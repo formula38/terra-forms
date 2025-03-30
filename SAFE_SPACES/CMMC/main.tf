@@ -104,6 +104,6 @@ module "rds" {
 # =======================
 module "config" {
   source          = "./modules/config"
-  log_bucket_name = module.s3.log_bucket_name
+  log_bucket_name = var.log_bucket_name
   name_prefix     = var.name_prefix
   }
