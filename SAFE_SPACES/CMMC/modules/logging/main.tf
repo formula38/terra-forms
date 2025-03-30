@@ -1,40 +1,46 @@
-##############################################
-# modules/logging/main.tf - CMMC Flow Logs
-##############################################
-
-resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+resource "aws_cloudwatch_log_group" "cmmc_vpc_flow" {
   name              = var.log_group_name
   retention_in_days = var.retention_in_days
-  tags = {
-    Environment = var.environment
-  }
+
+  tags = merge(
+    {
+      Environment = var.environment
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_iam_role" "cmmc_flow_role" {
   name = var.flow_log_role_name
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
+      Action = "sts:AssumeRole",
       Effect = "Allow",
       Principal = {
         Service = "vpc-flow-logs.amazonaws.com"
-      },
-      Action = "sts:AssumeRole"
+      }
     }]
   })
-  tags = {
-    Environment = var.environment
-  }
+
+  tags = merge(
+    {
+      Environment = var.environment
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_iam_role_policy" "cmmc_flow_policy" {
-  name = var.flow_log_policy_name
+  name = "cmmc_flow_log_policy"
   role = aws_iam_role.cmmc_flow_role.id
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect   = "Allow",
-      Action   = [
+      Effect = "Allow",
+      Action = [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
@@ -45,12 +51,9 @@ resource "aws_iam_role_policy" "cmmc_flow_policy" {
 }
 
 resource "aws_flow_log" "vpc_flow_log" {
-  vpc_id               = var.vpc_id
-  traffic_type         = "ALL"
-  log_destination      = aws_cloudwatch_log_group.cmmc_vpc_flow.arn
-  log_destination_type = "cloud-watch-logs"
-  iam_role_arn         = aws_iam_role.cmmc_flow_role.arn
-  tags = {
-    Environment = var.environment
-  }
+   log_destination_type = "cloud-watch-logs"
+   log_group_name       = aws_cloudwatch_log_group.cmmc_vpc_flow.name
+   iam_role_arn         = aws_iam_role.cmmc_flow_role.arn
+   traffic_type         = "ALL"
+   vpc_id               = var.vpc_id
 }

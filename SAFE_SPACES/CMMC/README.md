@@ -1,48 +1,17 @@
-Here's the updated `README.md` tailored with an architecture diagram, plus details on how this infrastructure meets **CMMC compliance** at a technical level:
+Here’s your enhanced and tailored `README.md` for the **CMMC-Compliant AWS Infrastructure**. It includes diagrams and highlights how the infrastructure aligns with **CMMC** requirements:
 
 ---
 
 ### 📄 `README.md`
 
 ```markdown
-# 🛡️ CMMC-Compliant AWS Infrastructure
+# 🛡️ CMMC-Compliant AWS Infrastructure on AWS with Terraform
 
-This Terraform configuration provisions an AWS environment aligned with **CMMC (Cybersecurity Maturity Model Certification)** requirements using modular Infrastructure-as-Code (IaC).
-
----
-
-## 📐 Architecture Diagram
-
-```text
-                        ┌──────────────────────┐
-                        │    Trusted IP Range  │
-                        └────────────┬─────────┘
-                                     │
-                           ┌─────────▼─────────┐
-                           │     VPC (10.0.0.0/16)     │
-                           └─────────┬─────────┘
-                                     │
-       ┌─────────────────────────────┴─────────────────────────────┐
-       │                        Subnets (A & B)                     │
-       │   ┌────────────┐                       ┌──────────────┐    │
-       │   │  EC2 w/ IAM│                       │  RDS PostgreSQL │    │
-       │   │ (EBS + KMS)│                       │  (KMS-encrypted)│    │
-       │   └────┬───────┘                       └──────────────┘    │
-       │        │                                                     │
-       │   ┌────▼────┐      ┌────────────┐      ┌────────────────┐    │
-       │   │  S3 Log │◄─────┤ Flow Logs  ├─────►│ CloudWatch Logs│    │
-       │   │  Bucket │      └────────────┘      └────────────────┘    │
-       └──────────────────────────────────────────────────────────────┘
-                                     │
-                            ┌────────▼────────┐
-                            │   AWS Config    │
-                            │(Recorder + Role)│
-                            └─────────────────┘
-```
+This project provisions a modular, secure, and compliant cloud environment aligned with **Cybersecurity Maturity Model Certification (CMMC)** standards using Terraform on AWS.
 
 ---
 
-## 🔧 Project Structure
+## 📦 Project Structure
 
 ```
 CMMC/
@@ -52,79 +21,103 @@ CMMC/
 ├── outputs.tf
 ├── providers.tf
 ├── modules/
-│   ├── compute/       # EC2 with IAM, EBS, userdata
-│   ├── config/        # AWS Config Recorder + Role
-│   ├── kms/           # KMS key with policy
-│   ├── logging/       # VPC Flow Logs + CloudWatch
-│   ├── networking/    # VPC, subnets, routing, SGs
-│   ├── rds/           # Encrypted PostgreSQL instance
-│   └── s3/            # Encrypted S3 buckets for logs and data
+│   ├── compute/
+│   ├── config/
+│   ├── kms/
+│   ├── logging/
+│   ├── networking/
+│   ├── rds/
+│   └── s3/
+```
+
+Each module is responsible for a discrete part of the infrastructure, ensuring security and compliance boundaries.
+
+---
+
+## 🧭 Architecture Diagram
+
+```text
+                           +-----------------------------+
+                           |     AWS Config + CloudTrail |
+                           |      (Monitoring & Audit)   |
+                           +--------------+--------------+
+                                          |
+                                  +-------+-------+
+                                  |               |
+                           +------+------++-------+------+
+                           |  S3 Buckets  ||   CloudWatch |
+                           | (Data & Logs)||   Flow Logs |
+                           +------+------++-------+------+
+                                  |               |
+                                  |               |
+                          +-------+---------------+--------+
+                          |   VPC (Private & Public Subnets) |
+                          +----------------+----------------+
+                                           |
+                   +-----------------------+-----------------------+
+                   |                                               |
+        +----------+----------+                       +------------+------------+
+        |    EC2 Compute       |                       |         RDS PostgreSQL  |
+        |   + KMS + IAM + SSM  |                       |   + Subnet Group + KMS  |
+        +----------------------+                       +-------------------------+
 ```
 
 ---
 
-## 🧱 Modules
+## ✅ Compliance-Driven Features
 
-Each module encapsulates its own:
-- `main.tf`: Resource definitions
-- `variables.tf`: Input variables
-- `outputs.tf`: Output values
-
-This promotes **reusability, clarity, and control**.
-
----
-
-## ✅ How It Meets CMMC Compliance
-
-| Requirement                     | Terraform Implementation                                                                 |
-|--------------------------------|-------------------------------------------------------------------------------------------|
-| **Access Control (AC)**         | Security Groups restrict ingress to trusted IPs                                         |
-| **Audit & Accountability (AU)**| Flow Logs to CloudWatch, AWS Config for auditing                                         |
-| **Configuration Management (CM)** | AWS Config tracks resource drift and changes                                             |
-| **Identification & Authentication (IA)** | IAM roles and least-privilege policies for services and EC2                           |
-| **Media Protection (MP)**       | All storage (S3, EBS, RDS) encrypted via KMS                                             |
-| **System & Communications Protection (SC)** | VPC isolation, subnet design, no public access on sensitive resources                 |
-| **System Integrity (SI)**       | EBS volume encryption, secure AMIs, and userdata scripts enforce updates and controls    |
+| Component      | CMMC Capability                        | Implementation                            |
+|----------------|----------------------------------------|--------------------------------------------|
+| **Encryption** | SC.L2-3.13.11, SC.L2-3.13.16           | KMS for S3, RDS, EBS                        |
+| **Audit Logs** | AU.L2-3.3.1, AU.L2-3.3.2               | CloudWatch Logs, AWS Config, VPC Flow Logs |
+| **Access Ctrl**| AC.L2-3.1.1, AC.L2-3.1.2               | IAM Roles w/ Least Privilege               |
+| **Patch Mgmt** | SI.L2-3.14.1                           | (Option to use SSM Patch Compliance)       |
+| **Boundary Prot** | SC.L2-3.13.1, SC.L2-3.13.5         | Security Groups, VPC, Subnet Isolation     |
+| **Backup**     | CP.L2-3.8.1, CP.L2-3.8.3               | Encrypted S3 Log Storage                   |
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Configure AWS CLI**:
+1. **Install Terraform**
+   ```bash
+   brew install terraform     # Mac
+   sudo apt install terraform # Debian/Ubuntu
+   ```
+
+2. **AWS CLI Setup**
    ```bash
    aws configure
    ```
 
-2. **Initialize Terraform**:
+3. **Clone and Initialize**
    ```bash
+   git clone https://github.com/YOUR_ORG/CMMC-Infrastructure.git
+   cd CMMC
    terraform init
    ```
 
-3. **Plan Infrastructure**:
+4. **Customize Variables**
+   Edit `terraform.tfvars` with your deployment-specific settings.
+
+5. **Deploy Infrastructure**
    ```bash
    terraform plan -var-file="terraform.tfvars"
-   ```
-
-4. **Apply Infrastructure**:
-   ```bash
    terraform apply -var-file="terraform.tfvars"
    ```
 
 ---
 
-## 🔐 Security Summary
+## 🔐 Security Features
 
-✅ **KMS Encryption**  
-✅ **IAM Role Least Privilege**  
-✅ **CloudTrail-ready Logging**  
-✅ **Audit with AWS Config**  
-✅ **No hard-coded secrets**  
+- **Data Encryption**: All storage (EBS, RDS, S3) uses **customer-managed KMS keys**
+- **Auditing & Logging**: AWS Config + VPC Flow Logs + IAM Role tracking
+- **Principle of Least Privilege**: IAM roles scoped per service/module
+- **Secure Networking**: Subnet isolation, no public RDS, ingress limited to `trusted_ip_range`
 
 ---
 
-## 🧹 Clean Up
-
-To destroy all resources created:
+## 🧹 Tear Down
 
 ```bash
 terraform destroy -var-file="terraform.tfvars"
@@ -132,15 +125,21 @@ terraform destroy -var-file="terraform.tfvars"
 
 ---
 
+## 🧪 Testing & Hardening Suggestions
+
+- Enable **GuardDuty**, **Security Hub**, or **Macie**
+- Integrate with **AWS SSM Patch Compliance**
+- Add CI/CD validation (e.g., GitHub Actions, OPA/Conftest checks)
+- Extend IAM Roles with session control & MFA
+
+---
+
 ## 📄 License
 
-MIT © Coldchain Secure
+MIT © [Coldchain Secure](https://coldchainsecure.com)
+
 ```
 
 ---
 
-Let me know if you want:
-- Compliance mapping to CMMC Levels 1–3  
-- GitHub badge integration  
-- A Markdown diagram instead of ASCII  
-- Visual infrastructure charts via Mermaid or PlantUML
+Would you like a `README.architecture.png` diagram version generated as well, or should we proceed to audit the modules for any edge cases or security oversights?

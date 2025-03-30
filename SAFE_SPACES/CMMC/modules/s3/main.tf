@@ -1,17 +1,20 @@
-resource "aws_s3_bucket" "cmmc_data_bucket" {
+resource "aws_s3_bucket" "data" {
   bucket = var.data_bucket_name
-  tags   = {
-    Name = "cmmc-data-bucket"
-  }
+  tags = merge(
+    {
+      Name = "${var.name_prefix}-data"
+    },
+    var.common_tags
+  )
 }
 
-resource "aws_s3_bucket_acl" "cmmc_data_acl" {
-  bucket = aws_s3_bucket.cmmc_data_bucket.id
+resource "aws_s3_bucket_acl" "data_acl" {
+  bucket = aws_s3_bucket.data.id
   acl    = "private"
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "cmmc_data_enc" {
-  bucket = aws_s3_bucket.cmmc_data_bucket.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "data_encryption" {
+  bucket = aws_s3_bucket.data.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -21,20 +24,23 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cmmc_data_enc" {
   }
 }
 
-resource "aws_s3_bucket" "cmmc_log_bucket" {
+resource "aws_s3_bucket" "logs" {
   bucket = var.log_bucket_name
-  tags   = {
-    Name = "cmmc-log-bucket"
-  }
+  tags = merge(
+    {
+      Name = "${var.name_prefix}-logs"
+    },
+    var.common_tags
+  )
 }
 
-resource "aws_s3_bucket_acl" "cmmc_log_acl" {
-  bucket = aws_s3_bucket.cmmc_log_bucket.id
+resource "aws_s3_bucket_acl" "logs_acl" {
+  bucket = aws_s3_bucket.logs.id
   acl    = "private"
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "cmmc_log_enc" {
-  bucket = aws_s3_bucket.cmmc_log_bucket.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs_encryption" {
+  bucket = aws_s3_bucket.logs.id
 
   rule {
     apply_server_side_encryption_by_default {

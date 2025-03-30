@@ -1,27 +1,27 @@
 resource "aws_kms_key" "cmmc_kms" {
-  description             = "CMMC-compliant KMS key"
+  description             = "CMMC-compliant KMS key for data encryption"
   deletion_window_in_days = 30
   enable_key_rotation     = true
 
   policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
-        Sid       = "AllowAdministration",
-        Effect    = "Allow",
+        Sid    = "AllowAdminAccess",
+        Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          AWS = "arn:aws:iam::${var.account_id}:root"
         },
-        Action    = "kms:*",
-        Resource  = "*"
+        Action   = "kms:*",
+        Resource = "*"
       },
       {
-        Sid       = "AllowUsageByServices",
-        Effect    = "Allow",
+        Sid    = "AllowCloudTrailUsage",
+        Effect = "Allow",
         Principal = {
           Service = "cloudtrail.amazonaws.com"
         },
-        Action    = [
+        Action = [
           "kms:Encrypt",
           "kms:Decrypt",
           "kms:ReEncrypt*",
@@ -31,6 +31,12 @@ resource "aws_kms_key" "cmmc_kms" {
       }
     ]
   })
-}
 
-data "aws_caller_identity" "current" {}
+  tags = merge(
+    {
+      Name        = "${var.name_prefix}-kms"
+      Environment = var.environment
+      },
+      var.common_tags
+      )
+  }

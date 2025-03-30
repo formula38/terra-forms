@@ -1,14 +1,24 @@
+variable "name_prefix" {
+  description = "Prefix to use for resource names"
+  type        = string
+}
+
 variable "data_bucket_name" {
-  description = "Name of the S3 bucket for data storage"
+  description = "Name of the data S3 bucket"
   type        = string
 }
 
 variable "log_bucket_name" {
-  description = "Name of the S3 bucket for log storage"
+  description = "Name of the log S3 bucket"
   type        = string
 }
 
 variable "kms_key_arn" {
-  description = "ARN of the KMS key for encryption"
+  description = "KMS key ARN for bucket encryption"
   type        = string
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
 }

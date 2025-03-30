@@ -1,17 +1,19 @@
 resource "aws_iam_role" "config_role" {
-  name = "${var.name_prefix}_config_role"
+  name = "${var.name_prefix}-config-role"
   assume_role_policy = jsonencode({
     Version   = "2012-10-17",
     Statement = [{
       Effect    = "Allow",
-      Principal = { Service = "config.amazonaws.com" },
+      Principal = {
+        Service = "config.amazonaws.com"
+      },
       Action    = "sts:AssumeRole"
     }]
   })
 }
 
 resource "aws_config_configuration_recorder" "recorder" {
-  name     = "${var.name_prefix}_config_recorder"
+  name     = "${var.name_prefix}-recorder"
   role_arn = aws_iam_role.config_role.arn
 
   recording_group {
@@ -20,8 +22,8 @@ resource "aws_config_configuration_recorder" "recorder" {
   }
 }
 
-resource "aws_config_delivery_channel" "channel" {
-  name           = "${var.name_prefix}_config_channel"
+resource "aws_config_delivery_channel" "delivery" {
+  name           = "${var.name_prefix}-delivery-channel"
   s3_bucket_name = var.log_bucket_name
 
   depends_on = [aws_config_configuration_recorder.recorder]

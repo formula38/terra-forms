@@ -1,38 +1,29 @@
-# modules/logging/variables.tf
-
 variable "vpc_id" {
-  description = "ID of the VPC for which to enable flow logs"
+  description = "The ID of the VPC to attach flow logs to."
   type        = string
 }
 
 variable "log_group_name" {
-  description = "Name of the CloudWatch log group"
+  description = "The name of the CloudWatch Log Group for flow logs."
   type        = string
-  default     = "/aws/vpc/cmmc-flow-logs"
-}
-
-variable "flow_log_bucket" {
-  description = "The name of the CloudWatch Log Group for VPC flow logs"
-  type        = string
-}
-
-variable "region" {
-  description = "AWS region for resource placement"
-  type        = string
-}
+  }
 
 variable "retention_in_days" {
-  description = "Retention period for log group"
+  description = "Number of days to retain logs"
   type        = number
-  default     = 90
+  }
+
+variable "flow_log_role_name" {
+  description = "IAM Role name for flow logs."
+  type        = string
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
 }
 
 variable "environment" {
-  description = "Deployment environment"
+  description = "Environment tag."
   type        = string
-}
-
-variable "flow_log_role_name" {
-  description = "Name for the IAM role used for flow logs"
-  type        = string
-}
+  }

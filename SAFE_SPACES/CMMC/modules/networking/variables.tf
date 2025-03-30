@@ -1,38 +1,39 @@
-variable "region" {
-  description = "AWS region for deployment"
-  type        = string
-}
-
-variable "environment" {
-  description = "Deployment environment (e.g., production)"
-  type        = string
-}
-
-variable "trusted_ip_range" {
-  description = "Trusted IP range for security group ingress"
-  type        = string
-}
-
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
-
 variable "vpc_cidr" {
-  description = "VPC CIDR block"
+  description = "CIDR block for the VPC"
+  type        = string
 }
 
 variable "vpc_name" {
-  description = "Name tag for VPC"
+  description = "Name of the VPC"
+  type        = string
 }
 
 variable "subnet_cidr_a" {
-  description = "CIDR block for subnet A"
+  description = "CIDR block for Subnet A"
   type        = string
 }
 
 variable "subnet_cidr_b" {
-  description = "CIDR block for subnet B"
+  description = "CIDR block for Subnet B"
   type        = string
+}
+
+variable "region" {
+  description = "AWS region"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment tag (e.g. production)"
+  type        = string
+}
+
+variable "trusted_ip_range" {
+  description = "CIDR block for trusted IP ingress"
+  type        = string
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
 }

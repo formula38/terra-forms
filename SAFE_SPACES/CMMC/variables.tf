@@ -1,45 +1,109 @@
+# =============================
+# Shared / Root-level Variables
+# =============================
+
 variable "region" {
   description = "AWS region for deployment"
   type        = string
-  default     = "us-east-1"
-}
+  }
 
 variable "environment" {
-  description = "Deployment environment (e.g., dev, staging, prod)"
+  description = "Deployment environment (e.g., dev, staging, production)"
   type        = string
-  default     = "production"
-}
+  }
 
 variable "trusted_ip_range" {
-  description = "Trusted IP range for access"
+  description = "CIDR block for trusted IPs"
   type        = string
-  default     = "203.0.113.0/24"
-}
+  }
 
-variable "db_username" {
-  description = "Database username"
+variable "created_by" {
+  description = "Who created the infrastructure"
   type        = string
-  default     = "dbadmin"
-}
+  }
 
-variable "db_password" {
-  description = "Database password"
+variable "created_on" {
+  description = "When the infrastructure was created"
   type        = string
-  sensitive   = true
-}
+  }
+
+# =============================
+# Compute Module
+# =============================
 
 variable "ami_id" {
   description = "AMI ID for EC2 instance"
   type        = string
-  default     = "ami-0c55b159cbfafe1f0" # Replace as needed
+  }
+
+# =============================
+# RDS Module
+# =============================
+
+variable "db_username" {
+  description = "Username for RDS database"
+  type        = string
 }
+
+variable "db_password" {
+  description = "Password for RDS database"
+  type        = string
+  sensitive   = true
+}
+
+# =============================
+# Networking Module
+# =============================
 
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
-  default     = "10.0.0.0/16"
+  type        = string
 }
 
 variable "vpc_name" {
-  description = "Tag name for the VPC"
-  default     = "cmmc-vpc"
+  description = "Name of the VPC for tagging"
+  type        = string
+}
+
+variable "subnet_cidr_a" {
+  description = "CIDR block for Subnet A"
+  type        = string
+}
+
+variable "subnet_cidr_b" {
+  description = "CIDR block for Subnet B"
+  type        = string
+}
+
+# =============================
+# Common Tag Prefix / Naming
+# =============================
+
+variable "name_prefix" {
+  description = "Prefix to apply to named resources"
+  type        = string
+}
+
+# =============================
+# Logging Module
+# =============================
+
+variable "retention_in_days" {
+  description = "Retention period for CloudWatch logs"
+  type        = number
+  default     = 90
+}
+
+# =============================
+# S3 Module
+# =============================
+
+variable "data_bucket_name" {
+  description = "Name for the main S3 data bucket"
+  type        = string
+}
+
+variable "log_bucket_name" {
+  description = "Name for the S3 log bucket"
+  type        = string
 }
