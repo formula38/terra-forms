@@ -59,11 +59,13 @@ module "kms" {
 # 📦 S3 MODULE
 # =======================
 module "s3" {
-  source           = "./modules/s3"
-  name_prefix      = var.name_prefix
-  data_bucket_name = var.data_bucket_name
-  log_bucket_name  = var.log_bucket_name
-  kms_key_arn      = module.kms.kms_key_arn
+  source             = "./modules/s3"
+  name_prefix        = var.name_prefix
+  data_bucket_name   = var.data_bucket_name
+  log_bucket_name    = var.log_bucket_name
+  kms_key_arn        = module.kms.kms_key_arn
+  s3_acl             = var.s3_acl
+  sse_algorithm      = var.sse_algorithm
 
   common_tags = local.common_tags
 }

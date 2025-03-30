@@ -22,3 +22,16 @@ variable "common_tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)
 }
+
+variable "s3_acl" {
+  description = "The ACL to apply to the S3 buckets"
+  type        = string
+  default     = "private"
+}
+
+variable "sse_algorithm" {
+  description = "The server-side encryption algorithm for S3 buckets"
+  type        = string
+  default     = "aws:kms"
+}
+

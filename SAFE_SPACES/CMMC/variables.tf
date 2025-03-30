@@ -162,3 +162,16 @@ variable "log_bucket_name" {
   description = "Name for the S3 log bucket"
   type        = string
 }
+
+variable "s3_acl" {
+  description = "The ACL to apply to the S3 buckets"
+  type        = string
+  default     = "private"
+}
+
+variable "sse_algorithm" {
+  description = "The server-side encryption algorithm for S3 buckets"
+  type        = string
+  default     = "aws:kms"
+}
+
