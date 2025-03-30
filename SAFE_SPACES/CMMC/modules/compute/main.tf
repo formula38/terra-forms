@@ -40,7 +40,8 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 resource "aws_instance" "cmmc_ec2" {
   ami                         = var.ami_id
-  instance_type               = "t3.micro"
+  instance_type               = var.instance_type
+
   subnet_id                   = var.subnet_id
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
   vpc_security_group_ids      = var.security_group_ids

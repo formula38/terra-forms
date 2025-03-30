@@ -30,6 +30,12 @@ variable "ebs_device_name" {
   type        = string
 }
 
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.micro"
+}
+
 # =============================
 # RDS Module
 # =============================

@@ -15,6 +15,7 @@ created_on       = "2025-03-28" # Or dynamically from automation
 
 ami_id          = "ami-0c55b159cbfafe1f0" # AMI used by EC2 instance in compute module
 ebs_device_name = "/dev/sda1"
+instance_type   = "t3.micro" # or t3.small, m5.large, etc.
 
 # =============================
 # RDS Module
