@@ -52,22 +52,22 @@ variable "security_group_ingress_rules" {
     protocol    = string
     cidr_blocks = list(string)
   }))
-  default = [
-    {
-      description = "HTTPS"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = ["203.0.113.0/24"]
-    },
-    {
-      description = "SSH"
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["203.0.113.0/24"]
-    }
-  ]
+  # default = [
+  #   {
+  #     description = "HTTPS"
+  #     from_port   = 443
+  #     to_port     = 443
+  #     protocol    = "tcp"
+  #     cidr_blocks = ["203.0.113.0/24"]
+  #   },
+  #   {
+  #     description = "SSH"
+  #     from_port   = 22
+  #     to_port     = 22
+  #     protocol    = "tcp"
+  #     cidr_blocks = ["203.0.113.0/24"]
+  #   }
+  # ]
 }
 
 variable "security_group_egress_rules" {
@@ -79,14 +79,14 @@ variable "security_group_egress_rules" {
     protocol    = string
     cidr_blocks = list(string)
   }))
-  default = [
-    {
-      description = "All outbound"
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  ]
+  # default = [
+  #   {
+  #     description = "All outbound"
+  #     from_port   = 0
+  #     to_port     = 0
+  #     protocol    = "-1"
+  #     cidr_blocks = ["0.0.0.0/0"]
+  #   }
+  # ]
 }
 
