@@ -20,10 +20,10 @@ output "log_bucket_arn" {
 
 output "data_bucket_name" {
   description = "Name of the data S3 bucket"
-  value        = aws_s3_bucket.data.bucket
+  value       = aws_s3_bucket.data.bucket
 }
 
 output "log_bucket_name" {
   description = "Name of the S3 bucket for AWS Config delivery"
-  value        = aws_s3_bucket.logs.bucket
+  value       = aws_s3_bucket.logs.bucket
 }

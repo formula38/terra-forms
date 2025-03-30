@@ -46,7 +46,7 @@ resource "aws_subnet" "subnet_b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.subnet_cidr_b
   availability_zone = "${var.region}b"
-  
+
   tags = merge(
     {
       Name        = "${var.vpc_name}-subnet-b"

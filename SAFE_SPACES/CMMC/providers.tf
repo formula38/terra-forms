@@ -13,10 +13,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "www.coldchainsecure.com"
-    key            = "terraform/state/cmmc.tfstate"
-    region         = "us-west-1"
-    encrypt        = true
+    bucket  = "www.coldchainsecure.com"
+    key     = "terraform/state/cmmc.tfstate"
+    region  = "us-west-1"
+    encrypt = true
   }
 }
 

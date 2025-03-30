@@ -14,6 +14,6 @@ output "log_destination" {
 }
 
 output "flow_log_role_name" {
-  description  = "IAM Role name for flow logs."
-  value        = aws_iam_role.cmmc_flow_role.name
+  description = "IAM Role name for flow logs."
+  value       = aws_iam_role.cmmc_flow_role.name
 }

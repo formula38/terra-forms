@@ -11,12 +11,12 @@ variable "vpc_id" {
 variable "log_destination" {
   description = "The name of the CloudWatch Log Group for flow logs."
   type        = string
-  }
+}
 
 variable "retention_in_days" {
   description = "Number of days to retain logs"
   type        = number
-  }
+}
 
 variable "flow_log_role_name" {
   description = "IAM Role name for flow logs."
@@ -31,4 +31,4 @@ variable "common_tags" {
 variable "environment" {
   description = "Environment tag."
   type        = string
-  }
+}

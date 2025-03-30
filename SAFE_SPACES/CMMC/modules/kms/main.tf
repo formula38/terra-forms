@@ -36,7 +36,7 @@ resource "aws_kms_key" "cmmc_kms" {
     {
       Name        = "${var.name_prefix}-kms"
       Environment = var.environment
-      },
-      var.common_tags
-      )
-  }
+    },
+    var.common_tags
+  )
+}
