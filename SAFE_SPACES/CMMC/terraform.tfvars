@@ -40,6 +40,35 @@ subnet_cidr_a    = "10.0.1.0/24"
 subnet_cidr_b    = "10.0.2.0/24"
 route_cidr_block = "0.0.0.0/0"
 
+# === Security Group Rules ===
+security_group_ingress_rules = [
+  {
+    description = "Allow HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["203.0.113.0/24"]
+  },
+  {
+    description = "Allow SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["203.0.113.0/24"]
+  }
+]
+
+security_group_egress_rules = [
+  {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+]
+
+
 # =============================
 # Common Tag Prefix / Naming
 # =============================

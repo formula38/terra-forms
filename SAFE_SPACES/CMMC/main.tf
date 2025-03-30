@@ -15,18 +15,21 @@ locals {
 # 🧠 NETWORKING MODULE
 # =======================
 module "networking" {
-  source           = "./modules/networking"
-  vpc_cidr         = var.vpc_cidr
-  vpc_name         = var.vpc_name
-  region           = var.region
-  route_cidr_block = var.route_cidr_block
-  subnet_cidr_a    = var.subnet_cidr_a
-  subnet_cidr_b    = var.subnet_cidr_b
-  trusted_ip_range = var.trusted_ip_range
-  environment      = var.environment
+  source                   = "./modules/networking"
+  vpc_cidr                 = var.vpc_cidr
+  vpc_name                 = var.vpc_name
+  region                   = var.region
+  route_cidr_block         = var.route_cidr_block
+  subnet_cidr_a            = var.subnet_cidr_a
+  subnet_cidr_b            = var.subnet_cidr_b
+  trusted_ip_range         = var.trusted_ip_range
+  environment              = var.environment
+  security_group_ingress_rules = var.security_group_ingress_rules
+  security_group_egress_rules  = var.security_group_egress_rules
 
   common_tags = local.common_tags
 }
+
 
 # =======================
 # 📊 LOGGING MODULE
