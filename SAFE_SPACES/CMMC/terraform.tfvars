@@ -22,6 +22,12 @@ ebs_device_name = "/dev/sda1"
 
 db_username = "dbadmin"
 db_password = "YourSecurePasswordHere!"  # Consider secure storage for production use
+engine              = "postgres"
+engine_version      = "13.4"
+instance_class      = "db.t3.small"
+allocated_storage   = 20
+storage_encrypted   = true
+skip_final_snapshot = true
 
 # =============================
 # Networking Module

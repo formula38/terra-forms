@@ -32,13 +32,13 @@ module "networking" {
 # 📊 LOGGING MODULE
 # =======================
 module "logging" {
-  source              = "./modules/logging"
-  name_prefix         = var.name_prefix
-  vpc_id              = module.networking.vpc_id
-  retention_in_days   = var.retention_in_days
-  log_destination     = var.log_destination
-  environment         = var.environment
-  flow_log_role_name  = var.flow_log_role_name
+  source             = "./modules/logging"
+  name_prefix        = var.name_prefix
+  vpc_id             = module.networking.vpc_id
+  retention_in_days  = var.retention_in_days
+  log_destination    = var.log_destination
+  environment        = var.environment
+  flow_log_role_name = var.flow_log_role_name
 
   common_tags = local.common_tags
 }
@@ -59,11 +59,11 @@ module "kms" {
 # 📦 S3 MODULE
 # =======================
 module "s3" {
-  source            = "./modules/s3"
-  name_prefix       = var.name_prefix
-  data_bucket_name  = var.data_bucket_name
-  log_bucket_name   = var.log_bucket_name
-  kms_key_arn       = module.kms.kms_key_arn
+  source           = "./modules/s3"
+  name_prefix      = var.name_prefix
+  data_bucket_name = var.data_bucket_name
+  log_bucket_name  = var.log_bucket_name
+  kms_key_arn      = module.kms.kms_key_arn
 
   common_tags = local.common_tags
 }
@@ -89,14 +89,20 @@ module "compute" {
 # 🛢️ RDS POSTGRES MODULE
 # =======================
 module "rds" {
-  source             = "./modules/rds"
-  name_prefix        = var.name_prefix
-  db_username        = var.db_username
-  db_password        = var.db_password
-  subnet_ids         = module.networking.subnet_ids
-  kms_key_id         = module.kms.kms_key_id
-  security_group_ids = [module.networking.security_group_id]
-  environment        = var.environment
+  source              = "./modules/rds"
+  name_prefix         = var.name_prefix
+  db_username         = var.db_username
+  db_password         = var.db_password
+  engine              = var.engine
+  engine_version      = var.engine_version
+  instance_class      = var.instance_class
+  allocated_storage   = var.allocated_storage
+  storage_encrypted   = var.storage_encrypted
+  skip_final_snapshot = var.skip_final_snapshot
+  subnet_ids          = module.networking.subnet_ids
+  kms_key_id          = module.kms.kms_key_id
+  security_group_ids  = [module.networking.security_group_id]
+  environment         = var.environment
 
   common_tags = local.common_tags
 }
@@ -108,4 +114,4 @@ module "config" {
   source          = "./modules/config"
   log_bucket_name = var.log_bucket_name
   name_prefix     = var.name_prefix
-  }
+}
