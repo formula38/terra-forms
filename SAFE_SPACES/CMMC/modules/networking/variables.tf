@@ -18,6 +18,11 @@ variable "subnet_cidr_b" {
   type        = string
 }
 
+variable "route_cidr_block" {
+  description = "CIDR block for route table default route"
+  type        = string
+}
+
 variable "region" {
   description = "AWS region"
   type        = string

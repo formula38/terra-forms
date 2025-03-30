@@ -19,6 +19,7 @@ module "networking" {
   vpc_cidr         = var.vpc_cidr
   vpc_name         = var.vpc_name
   region           = var.region
+  route_cidr_block = var.route_cidr_block
   subnet_cidr_a    = var.subnet_cidr_a
   subnet_cidr_b    = var.subnet_cidr_b
   trusted_ip_range = var.trusted_ip_range

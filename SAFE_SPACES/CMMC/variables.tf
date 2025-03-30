@@ -69,6 +69,11 @@ variable "subnet_cidr_b" {
   type        = string
 }
 
+variable "route_cidr_block" {
+  description = "CIDR block for the default route in the route table"
+  type        = string
+}
+
 # =============================
 # Common Tag Prefix / Naming
 # =============================

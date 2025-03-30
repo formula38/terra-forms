@@ -31,6 +31,7 @@ vpc_cidr      = "10.0.0.0/16"
 vpc_name      = "cmmc-vpc"
 subnet_cidr_a = "10.0.1.0/24"
 subnet_cidr_b = "10.0.2.0/24"
+route_cidr_block = "0.0.0.0/0"
 
 # =============================
 # Common Tag Prefix / Naming
