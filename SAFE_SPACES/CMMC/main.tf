@@ -34,7 +34,7 @@ module "logging" {
   source              = "./modules/logging"
   vpc_id              = module.networking.vpc_id
   retention_in_days   = var.retention_in_days
-  log_group_name      = "cmmc-vpc-flow-logs"
+  log_deestination    = "cmmc-vpc-flow-logs"
   environment         = var.environment
   flow_log_role_name  = "cmmc-flow-role"
 

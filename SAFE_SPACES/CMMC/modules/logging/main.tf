@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_log_group" "cmmc_vpc_flow" {
-  name              = var.log_group_name
+  name              = var.log_deestination
   retention_in_days = var.retention_in_days
 
   tags = merge(
@@ -52,7 +52,7 @@ resource "aws_iam_role_policy" "cmmc_flow_policy" {
 
 resource "aws_flow_log" "vpc_flow_log" {
    log_destination_type = "cloud-watch-logs"
-   log_group_name       = aws_cloudwatch_log_group.cmmc_vpc_flow.name
+   log_destination   = aws_cloudwatch_log_group.cmmc_vpc_flow.name
    iam_role_arn         = aws_iam_role.cmmc_flow_role.arn
    traffic_type         = "ALL"
    vpc_id               = var.vpc_id
