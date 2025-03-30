@@ -8,9 +8,14 @@ output "flow_log_id" {
   value       = aws_flow_log.vpc_flow_log.id
 }
 
-output "log_destination" {
+output "flow_log_group_name" {
   description = "The name of the CloudWatch Log Group for flow logs."
-  value       = aws_flow_log.vpc_flow_log.log_destination
+  value       = aws_cloudwatch_log_group.cmmc_vpc_flow
+}
+
+output "flow_log_group_arn" {
+  description = "ARN of the CloudWatch Log Group for VPC Flow Logs"
+  value       = aws_cloudwatch_log_group.cmmc_vpc_flow.arn
 }
 
 output "flow_log_role_name" {

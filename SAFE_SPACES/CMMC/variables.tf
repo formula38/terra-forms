@@ -163,7 +163,7 @@ variable "retention_in_days" {
   default     = 90
 }
 
-variable "log_destination" {
+variable "flow_log_group_name" {
   description = "The name of the CloudWatch Log Group for flow logs."
   type        = string
 }

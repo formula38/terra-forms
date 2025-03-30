@@ -40,8 +40,9 @@ module "logging" {
   name_prefix        = var.name_prefix
   vpc_id             = module.networking.vpc_id
   retention_in_days  = var.retention_in_days
-  log_destination    = var.log_destination
+  flow_log_group_arn = module.logging.flow_log_group_arn
   environment        = var.environment
+  flow_log_group_name = var.flow_log_group_name
   flow_log_role_name = var.flow_log_role_name
 
   common_tags = local.common_tags

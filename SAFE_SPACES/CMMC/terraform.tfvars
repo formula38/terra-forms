@@ -72,14 +72,14 @@ security_group_egress_rules = [
 # =============================
 
 name_prefix        = "cmmc" # Used to prefix resource names across modules
-flow_log_role_name = "flow-role"
 
 # =============================
 # Logging Module
 # =============================
 
 retention_in_days = 90
-log_destination   = "vpc-flow-logs"
+flow_log_group_name   = "vpc-flow-logs"
+flow_log_role_name = "flow-role"
 
 # =============================
 # S3 Module
