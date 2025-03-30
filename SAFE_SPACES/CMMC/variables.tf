@@ -5,28 +5,17 @@
 variable "region" {
   description = "AWS region for deployment"
   type        = string
-  }
+}
 
 variable "environment" {
   description = "Deployment environment (e.g., dev, staging, production)"
   type        = string
-  }
+}
 
 variable "trusted_ip_range" {
   description = "CIDR block for trusted IPs"
   type        = string
-  }
-
-variable "created_by" {
-  description = "Who created the infrastructure"
-  type        = string
-  }
-
-variable "created_on" {
-  description = "When the infrastructure was created"
-  type        = string
-  }
-
+}
 # =============================
 # Compute Module
 # =============================
@@ -34,7 +23,7 @@ variable "created_on" {
 variable "ami_id" {
   description = "AMI ID for EC2 instance"
   type        = string
-  }
+}
 
 # =============================
 # RDS Module
@@ -84,6 +73,16 @@ variable "name_prefix" {
   type        = string
 }
 
+variable "created_by" {
+  description = "Who created the infrastructure"
+  type        = string
+}
+
+variable "created_on" {
+  description = "When the infrastructure was created"
+  type        = string
+}
+
 # =============================
 # Logging Module
 # =============================
@@ -92,6 +91,16 @@ variable "retention_in_days" {
   description = "Retention period for CloudWatch logs"
   type        = number
   default     = 90
+}
+
+variable "log_deestination" {
+  description = "The name of the CloudWatch Log Group for flow logs."
+  type        = string
+}
+
+variable "flow_log_role_name" {
+  description = "IAM Role name for flow logs."
+  type        = string
 }
 
 # =============================

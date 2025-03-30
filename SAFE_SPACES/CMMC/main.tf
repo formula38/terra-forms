@@ -32,11 +32,12 @@ module "networking" {
 # =======================
 module "logging" {
   source              = "./modules/logging"
+  name_prefix         = var.name_prefix
   vpc_id              = module.networking.vpc_id
   retention_in_days   = var.retention_in_days
-  log_deestination    = "cmmc-vpc-flow-logs"
+  log_deestination    = var.log_deestination
   environment         = var.environment
-  flow_log_role_name  = "cmmc-flow-role"
+  flow_log_role_name  = var.flow_log_role_name
 
   common_tags = local.common_tags
 }
