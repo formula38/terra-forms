@@ -25,6 +25,11 @@ variable "ami_id" {
   type        = string
 }
 
+variable "ebs_device_name" {
+  description = "The name of the EBS device attached to the EC2 instance"
+  type        = string
+}
+
 # =============================
 # RDS Module
 # =============================
@@ -93,7 +98,7 @@ variable "retention_in_days" {
   default     = 90
 }
 
-variable "log_deestination" {
+variable "log_destination" {
   description = "The name of the CloudWatch Log Group for flow logs."
   type        = string
 }

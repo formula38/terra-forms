@@ -50,3 +50,13 @@ variable "common_tags" {
   type        = map(string)
 }
 
+variable "user_data_script_path" {
+  type        = string
+  description = "Path to the EC2 user data script"
+  default     = "scripts/ec2_user_data.sh"
+}
+
+variable "ebs_device_name" {
+  description = "The name of the EBS device attached to the EC2 instance"
+  type        = string
+}

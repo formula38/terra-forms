@@ -8,7 +8,7 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "log_deestination" {
+variable "log_destination" {
   description = "The name of the CloudWatch Log Group for flow logs."
   type        = string
   }

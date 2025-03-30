@@ -14,6 +14,7 @@ created_on  = "2025-03-28" # Or dynamically from automation
 # =============================
 
 ami_id = "ami-0c55b159cbfafe1f0"  # AMI used by EC2 instance in compute module
+ebs_device_name = "/dev/sda1"
 
 # =============================
 # RDS Module
@@ -36,12 +37,14 @@ subnet_cidr_b = "10.0.2.0/24"
 # =============================
 
 name_prefix = "cmmc"  # Used to prefix resource names across modules
+flow_log_role_name = "flow-role"
 
 # =============================
 # Logging Module
 # =============================
 
 retention_in_days = 90
+log_destination = "vpc-flow-logs"
 
 # =============================
 # S3 Module

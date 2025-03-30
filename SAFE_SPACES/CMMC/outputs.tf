@@ -34,6 +34,20 @@ output "kms_key_arn" {
   value = module.kms.kms_key_arn
 }
 
+# =============================
+# Logging Module
+# =============================
+
+output "log_destination" {
+  description = "The name of the CloudWatch Log Group for flow logs."
+  value       = module.logging.log_destination
+}
+
+output "flow_log_role_name" {
+  description = "IAM Role name for flow logs."
+  value       = module.logging.flow_log_role_name
+}
+
 # ============================
 # S3 Module Outputs
 # ============================

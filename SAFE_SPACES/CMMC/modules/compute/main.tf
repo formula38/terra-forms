@@ -46,41 +46,12 @@ resource "aws_instance" "cmmc_ec2" {
   vpc_security_group_ids      = var.security_group_ids
 
   ebs_block_device {
-    device_name = "/dev/sda1"
+    device_name = var.ebs_device_name
     encrypted   = true
     kms_key_id  = var.kms_key_arn
-    # volume_tags = {
-    #   Name        = "${var.name_prefix}-root-ebs"
-    #   Encrypted   = "true"
-    #   Compliance  = "CMMC"
-    #   Environment = var.environment
-    # }
-  }
+    }
 
-  user_data_base64 = base64encode(<<-EOF
-    #!/bin/bash
-    yum update -y
-    amazon-linux-extras enable epel
-    yum install -y epel-release
-
-    # Install Apache
-    yum install -y httpd
-    systemctl enable httpd
-    systemctl start httpd
-
-    # Install CloudWatch Agent
-    yum install -y amazon-cloudwatch-agent
-    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
-      -a fetch-config -m ec2 \
-      -c ssm:AmazonCloudWatch-linux-config \
-      -s
-
-    # Install and configure SSM Agent
-    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-    systemctl enable amazon-ssm-agent
-    systemctl start amazon-ssm-agent
-  EOF
-  )
+  user_data_base64 = base64encode(file(var.user_data_script_path))
 
   tags = merge(
     {

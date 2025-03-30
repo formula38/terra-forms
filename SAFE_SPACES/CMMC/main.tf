@@ -35,7 +35,7 @@ module "logging" {
   name_prefix         = var.name_prefix
   vpc_id              = module.networking.vpc_id
   retention_in_days   = var.retention_in_days
-  log_deestination    = var.log_deestination
+  log_destination     = var.log_destination
   environment         = var.environment
   flow_log_role_name  = var.flow_log_role_name
 
@@ -74,6 +74,7 @@ module "compute" {
   source             = "./modules/compute"
   name_prefix        = var.name_prefix
   ami_id             = var.ami_id
+  ebs_device_name    = var.ebs_device_name
   environment        = var.environment
   subnet_id          = module.networking.subnet_a_id
   security_group_ids = [module.networking.security_group_id]
