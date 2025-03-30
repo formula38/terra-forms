@@ -6,8 +6,6 @@ region           = "us-east-1"
 environment      = "production"
 trusted_ip_range = "203.0.113.0/24"
 created_by       = "coldchainsecure"
-created_on       = "2025-03-28" # Or dynamically from automation
-
 
 # =============================
 # Compute Module

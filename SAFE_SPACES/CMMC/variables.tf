@@ -153,11 +153,6 @@ variable "created_by" {
   type        = string
 }
 
-variable "created_on" {
-  description = "When the infrastructure was created"
-  type        = string
-}
-
 # =============================
 # Logging Module
 # =============================

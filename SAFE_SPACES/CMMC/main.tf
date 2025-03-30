@@ -3,11 +3,12 @@
 # =======================================
 
 locals {
+  created_on = formatdate("YYYY-MM-DD", timestamp())
   common_tags = {
     Name        = var.name_prefix
     Environment = var.environment
     CreatedBy   = var.created_by
-    CreatedOn   = var.created_on
+    CreatedOn   = local.created_on
   }
 }
 
