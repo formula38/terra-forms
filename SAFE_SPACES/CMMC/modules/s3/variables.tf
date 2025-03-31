@@ -1,3 +1,8 @@
+variable "account_id" {
+  description = "AWS Account ID for KMS policy"
+  type        = string
+}
+
 variable "name_prefix" {
   description = "Prefix to use for resource names"
   type        = string

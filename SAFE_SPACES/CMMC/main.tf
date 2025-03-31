@@ -59,6 +59,7 @@ module "kms" {
 module "s3" {
   source           = "./modules/s3"
   name_prefix      = var.name_prefix
+  account_id       = data.aws_caller_identity.current.account_id
   data_bucket_name = var.data_bucket_name
   log_bucket_name  = var.log_bucket_name
   kms_key_arn      = module.kms.kms_key_arn
@@ -116,6 +117,17 @@ module "config" {
   name_prefix     = var.name_prefix
   log_bucket_name = var.log_bucket_name
   log_bucket_arn  = module.s3.log_bucket_arn
+}
+
+# =======================
+# 🧾 AWS Cloudtrail MODULE
+# =======================
+module "cloudtrail" {
+  source          = "./modules/cloudtrail"
+  name_prefix     = var.name_prefix
+  log_bucket_name = var.log_bucket_name
+  kms_key_id      = module.kms.kms_key_id
+  common_tags     = local.common_tags
 }
 
 # ====================
