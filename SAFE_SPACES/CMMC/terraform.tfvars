@@ -6,6 +6,9 @@ region           = "us-east-1"
 environment      = "production"
 trusted_ip_range = "203.0.113.0/24"
 created_by       = "coldchainsecure"
+project          = "CMMC Infra"
+owner            = "Coldchain Secure"
+cost_center      = "CyberSec001"
 
 # =============================
 # Compute Module
@@ -32,11 +35,11 @@ skip_final_snapshot = true
 # Networking Module
 # =============================
 
-vpc_cidr         = "10.0.0.0/16"
-vpc_name         = "cmmc-vpc"
-subnet_cidr_a    = "10.0.1.0/24"
-subnet_cidr_b    = "10.0.2.0/24"
-route_cidr_block = "0.0.0.0/0"
+vpc_cidr            = "10.0.0.0/16"
+vpc_name            = "cmmc-vpc"
+subnet_cidr_a       = "10.0.1.0/24"
+subnet_cidr_b       = "10.0.2.0/24"
+route_cidr_block    = "0.0.0.0/0"
 availability_zone_a = "us-east-1a"
 availability_zone_b = "us-east-1b"
 
@@ -73,15 +76,15 @@ security_group_egress_rules = [
 # Common Tag Prefix / Naming
 # =============================
 
-name_prefix        = "cmmc" # Used to prefix resource names across modules
+name_prefix = "cmmc" # Used to prefix resource names across modules
 
 # =============================
 # Logging Module
 # =============================
 
-retention_in_days = 90
-flow_log_group_name   = "vpc-flow-logs"
-flow_log_role_name = "flow-role"
+retention_in_days   = 90
+flow_log_group_name = "vpc-flow-logs"
+flow_log_role_name  = "flow-role"
 
 # =============================
 # S3 Module

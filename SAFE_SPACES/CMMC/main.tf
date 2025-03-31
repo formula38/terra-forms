@@ -9,6 +9,9 @@ locals {
     Environment = var.environment
     CreatedBy   = var.created_by
     CreatedOn   = local.created_on
+    project     = var.project
+    owner       = var.owner
+    cost_center = var.cost_center
   }
 }
 

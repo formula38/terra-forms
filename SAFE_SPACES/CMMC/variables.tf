@@ -163,6 +163,21 @@ variable "created_by" {
   type        = string
 }
 
+variable "project" {
+  description = "Project name"
+  type        = string
+}
+
+variable "owner" {
+  description = "Owner of the infrastructure"
+  type        = string
+}
+
+variable "cost_center" {
+  description = "Cost center for tracking"
+  type        = string
+}
+
 # =============================
 # Logging Module
 # =============================

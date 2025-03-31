@@ -38,6 +38,11 @@ variable "availability_zone_b" {
   type        = string
 }
 
+variable "enable_igw_route" {
+  description = "Whether to add a default route to the Internet Gateway"
+  type        = bool
+  default     = true
+}
 
 variable "environment" {
   description = "Environment tag (e.g. production)"

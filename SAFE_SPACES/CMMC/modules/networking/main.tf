@@ -59,9 +59,12 @@ resource "aws_subnet" "subnet_b" {
 resource "aws_route_table" "rt" {
   vpc_id = aws_vpc.main.id
 
-  route {
-    cidr_block = var.route_cidr_block
-    gateway_id = aws_internet_gateway.igw.id
+  dynamic "route" {
+    for_each = var.enable_igw_route ? [1] : []
+    content {
+      cidr_block = var.route_cidr_block
+      gateway_id = aws_internet_gateway.igw.id
+    }
   }
 
   tags = merge(
