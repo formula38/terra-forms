@@ -6,28 +6,45 @@ resource "aws_kms_key" "cmmc_kms" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
+      # Admin/root access
       {
-        Sid    = "AllowAdminAccess",
-        Effect = "Allow",
-        Principal = {
-          AWS = "arn:aws:iam::${var.account_id}:root"
+        Sid: "AllowAdminKeyManagement",
+        Effect: "Allow",
+        Principal: {
+          AWS: "arn:aws:iam::${var.account_id}:root"
         },
-        Action   = "kms:*",
-        Resource = "*"
+        Action: [
+          "kms:Create*",
+          "kms:Describe*",
+          "kms:Enable*",
+          "kms:List*",
+          "kms:Put*",
+          "kms:Update*",
+          "kms:Revoke*",
+          "kms:Disable*",
+          "kms:Get*",
+          "kms:Delete*",
+          "kms:ScheduleKeyDeletion",
+          "kms:CancelKeyDeletion"
+        ],
+        Resource: "*"
       },
+
+      # CloudTrail encryption permissions
       {
-        Sid    = "AllowCloudTrailUsage",
-        Effect = "Allow",
-        Principal = {
-          Service = "cloudtrail.amazonaws.com"
+        Sid: "AllowCloudTrailKMSUsage",
+        Effect: "Allow",
+        Principal: {
+          Service: "cloudtrail.amazonaws.com"
         },
-        Action = [
+        Action: [
+          "kms:GenerateDataKey*",
           "kms:Encrypt",
           "kms:Decrypt",
           "kms:ReEncrypt*",
-          "kms:GenerateDataKey*"
+          "kms:DescribeKey"
         ],
-        Resource = "*"
+        Resource: "*"
       }
     ]
   })

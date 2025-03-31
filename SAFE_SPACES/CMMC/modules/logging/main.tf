@@ -49,9 +49,9 @@ resource "aws_iam_role_policy" "cmmc_flow_policy" {
         Resource = "${var.flow_log_group_arn}:*"
       },
       {
-        Sid    = "AllowLogGroupDiscovery"
-        Effect = "Allow"
-        Action = "logs:DescribeLogGroups"
+        Sid      = "AllowLogGroupDiscovery"
+        Effect   = "Allow"
+        Action   = "logs:DescribeLogGroups"
         Resource = "*"
       }
     ]
@@ -64,5 +64,7 @@ resource "aws_flow_log" "vpc_flow_log" {
   log_destination      = var.flow_log_group_arn
   iam_role_arn         = aws_iam_role.cmmc_flow_role.arn
   traffic_type         = "ALL"
-  vpc_id               = var.vpc_id
+  log_format = "$${timestamp} $${interface-id} $${srcaddr} $${dstaddr} $${protocol} $${packets} $${bytes} $${action} $${log-status}"
+
+  vpc_id = var.vpc_id
 }
