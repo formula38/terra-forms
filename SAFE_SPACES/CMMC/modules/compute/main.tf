@@ -13,25 +13,53 @@ resource "aws_iam_role" "ec2_role" {
 resource "aws_iam_role_policy" "ec2_policy" {
   name = "${var.name_prefix}-ec2-policy"
   role = aws_iam_role.ec2_role.id
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
+      # --- S3 Bucket Permissions ---
       {
-        Effect = "Allow",
-        Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
-        Resource = [
-          var.data_bucket_arn,
-          "${var.data_bucket_arn}/*"
-        ]
+        Sid      = "ListDataBucket"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = var.data_bucket_arn
+        Condition = {
+          StringLike = {
+            "s3:prefix" = ["home/", "logs/", "temp/*"]
+          }
+        }
       },
       {
-        Effect   = "Allow",
-        Action   = ["cloudwatch:PutMetricData"],
-        Resource = "*" # is this all resources for all regions and az's?
+        Sid      = "ReadWriteDataObjects"
+        Effect   = "Allow"
+        Action   = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Resource = "${var.data_bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-server-side-encryption" = "aws:kms"
+          }
+        }
+      },
+
+      # --- CloudWatch Metrics Publishing ---
+      {
+        Sid      = "SendCustomMetrics"
+        Effect   = "Allow"
+        Action   = "cloudwatch:PutMetricData"
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "cloudwatch:Namespace" = "Custom/CMMC"
+          }
+        }
       }
     ]
   })
 }
+
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "${var.name_prefix}-instance-profile"
@@ -51,6 +79,10 @@ resource "aws_instance" "cmmc_ec2" {
     encrypted   = true
     kms_key_id  = var.kms_key_arn
   }
+
+  disable_api_termination = true
+  monitoring              = true
+  source_dest_check       = true
 
   user_data_base64 = base64encode(file(var.user_data_script_path))
 

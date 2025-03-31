@@ -16,6 +16,7 @@ variable "trusted_ip_range" {
   description = "CIDR block for trusted IPs"
   type        = string
 }
+
 # =============================
 # Compute Module
 # =============================
@@ -152,7 +153,6 @@ variable "security_group_egress_rules" {
     security_groups  = optional(list(string), [])
   }))
 }
-
 
 # =============================
 # Common Tag Prefix / Naming

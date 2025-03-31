@@ -125,6 +125,7 @@ module "rds" {
 # =======================
 module "config" {
   source          = "./modules/config"
-  log_bucket_name = var.log_bucket_name
   name_prefix     = var.name_prefix
+  log_bucket_name = var.log_bucket_name
+  log_bucket_arn  = module.s3.log_bucket_arn
 }
