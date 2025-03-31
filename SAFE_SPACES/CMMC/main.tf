@@ -2,18 +2,6 @@
 # AWS CMMC-Compliant Infrastructure Entry
 # =======================================
 
-locals {
-  created_on = formatdate("YYYY-MM-DD", timestamp())
-  common_tags = {
-    Name        = var.name_prefix
-    Environment = var.environment
-    CreatedBy   = var.created_by
-    CreatedOn   = local.created_on
-    project     = var.project
-    owner       = var.owner
-    cost_center = var.cost_center
-  }
-}
 
 # =======================
 # 🧠 NETWORKING MODULE
@@ -128,4 +116,21 @@ module "config" {
   name_prefix     = var.name_prefix
   log_bucket_name = var.log_bucket_name
   log_bucket_arn  = module.s3.log_bucket_arn
+}
+
+# ====================
+# Global
+# ====================
+
+locals {
+  created_on = formatdate("YYYY-MM-DD", timestamp())
+  common_tags = {
+    Name        = var.name_prefix
+    Environment = var.environment
+    CreatedBy   = var.created_by
+    CreatedOn   = local.created_on
+    project     = var.project
+    owner       = var.owner
+    cost_center = var.cost_center
+  }
 }
