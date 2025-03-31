@@ -38,17 +38,26 @@ resource "aws_iam_role_policy" "cmmc_flow_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      Resource = "*"
-    }]
+    Statement = [
+      {
+        Sid    = "AllowLoggingToCloudWatch"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "${var.flow_log_group_arn}:*"
+      },
+      {
+        Sid    = "AllowLogGroupDiscovery"
+        Effect = "Allow"
+        Action = "logs:DescribeLogGroups"
+        Resource = "*"
+      }
+    ]
   })
 }
+
 
 resource "aws_flow_log" "vpc_flow_log" {
   log_destination_type = "cloud-watch-logs"
