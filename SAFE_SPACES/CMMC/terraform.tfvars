@@ -51,13 +51,21 @@ security_group_ingress_rules = [
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["203.0.113.0/24"]
+    ipv6_cidr_blocks = ["::/0"]
   },
   {
-    description = "Allow SSH"
+    description = "Allow SSH from Admin VPN"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["203.0.113.0/24"]
+    cidr_blocks = ["10.0.10.0/24"]
+  },
+  {
+    description     = "Internal SG Communication"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    # security_groups = []
   }
 ]
 
@@ -68,6 +76,14 @@ security_group_egress_rules = [
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  },
+  {
+    description     = "Allow internal SG egress"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    # security_groups = []
   }
 ]
 
