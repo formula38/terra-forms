@@ -30,9 +30,9 @@ resource "aws_iam_role_policy" "ec2_policy" {
         }
       },
       {
-        Sid      = "ReadWriteDataObjects"
-        Effect   = "Allow"
-        Action   = [
+        Sid    = "ReadWriteDataObjects"
+        Effect = "Allow"
+        Action = [
           "s3:GetObject",
           "s3:PutObject"
         ]
@@ -85,6 +85,12 @@ resource "aws_instance" "cmmc_ec2" {
   source_dest_check       = true
 
   user_data_base64 = base64encode(file(var.user_data_script_path))
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }
 
   tags = merge(
     {
