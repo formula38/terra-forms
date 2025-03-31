@@ -31,7 +31,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "subnet_a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.subnet_cidr_a
-  availability_zone = "${var.region}a"
+  availability_zone = var.availability_zone_a
 
   tags = merge(
     {
@@ -45,7 +45,7 @@ resource "aws_subnet" "subnet_a" {
 resource "aws_subnet" "subnet_b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.subnet_cidr_b
-  availability_zone = "${var.region}b"
+  availability_zone = var.availability_zone_b
 
   tags = merge(
     {

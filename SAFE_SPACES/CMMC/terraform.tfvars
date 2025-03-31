@@ -37,6 +37,8 @@ vpc_name         = "cmmc-vpc"
 subnet_cidr_a    = "10.0.1.0/24"
 subnet_cidr_b    = "10.0.2.0/24"
 route_cidr_block = "0.0.0.0/0"
+availability_zone_a = "us-east-1a"
+availability_zone_b = "us-east-1b"
 
 # === Security Group Rules ===
 security_group_ingress_rules = [

@@ -28,6 +28,17 @@ variable "region" {
   type        = string
 }
 
+variable "availability_zone_a" {
+  description = "Availability Zone for Subnet A"
+  type        = string
+}
+
+variable "availability_zone_b" {
+  description = "Availability Zone for Subnet B"
+  type        = string
+}
+
+
 variable "environment" {
   description = "Environment tag (e.g. production)"
   type        = string

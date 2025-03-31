@@ -116,6 +116,16 @@ variable "route_cidr_block" {
   type        = string
 }
 
+variable "availability_zone_a" {
+  description = "Availability Zone for Subnet A"
+  type        = string
+}
+
+variable "availability_zone_b" {
+  description = "Availability Zone for Subnet B"
+  type        = string
+}
+
 variable "security_group_ingress_rules" {
   description = "List of ingress rules for the security group"
   type = list(object({

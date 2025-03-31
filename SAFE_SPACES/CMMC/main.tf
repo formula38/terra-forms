@@ -20,6 +20,8 @@ module "networking" {
   vpc_cidr                     = var.vpc_cidr
   vpc_name                     = var.vpc_name
   region                       = var.region
+  availability_zone_a          = var.availability_zone_a
+  availability_zone_b          = var.availability_zone_b
   route_cidr_block             = var.route_cidr_block
   subnet_cidr_a                = var.subnet_cidr_a
   subnet_cidr_b                = var.subnet_cidr_b
@@ -36,14 +38,14 @@ module "networking" {
 # 📊 LOGGING MODULE
 # =======================
 module "logging" {
-  source             = "./modules/logging"
-  name_prefix        = var.name_prefix
-  vpc_id             = module.networking.vpc_id
-  retention_in_days  = var.retention_in_days
-  flow_log_group_arn = module.logging.flow_log_group_arn
-  environment        = var.environment
+  source              = "./modules/logging"
+  name_prefix         = var.name_prefix
+  vpc_id              = module.networking.vpc_id
+  retention_in_days   = var.retention_in_days
+  flow_log_group_arn  = module.logging.flow_log_group_arn
+  environment         = var.environment
   flow_log_group_name = var.flow_log_group_name
-  flow_log_role_name = var.flow_log_role_name
+  flow_log_role_name  = var.flow_log_role_name
 
   common_tags = local.common_tags
 }
