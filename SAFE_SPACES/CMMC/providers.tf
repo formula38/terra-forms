@@ -1,30 +1,29 @@
 terraform {
-  required_version = ">= 1.4.0"
+  required_version = ">= 1.11.2"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 4.0"
+      version = ">= 5.92.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.0"
+      version = ">= 3.7.1"
     }
-  }
-
-  backend "s3" {
-    bucket  = "www.coldchainsecure.com"
-    key     = "terraform/state/cmmc.tfstate"
-    region  = "us-west-1"
-    encrypt = true
   }
 }
 
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = {
+      Project     = var.project
+      Owner       = var.owner
+      Environment = var.environment
+    }
+  }
 }
 
 provider "random" {}
 
 data "aws_caller_identity" "current" {}
-
