@@ -1,5 +1,5 @@
 resource "aws_iam_role" "config_role" {
-  name = "${var.name_prefix}-config-role"
+  name = "${var.common_tags["Name"]}-config-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -16,7 +16,7 @@ resource "aws_iam_role" "config_role" {
 }
 
 resource "aws_iam_role_policy" "config_policy" {
-  name = "${var.name_prefix}-config-policy"
+  name = "${var.common_tags["Name"]}-config-policy"
   role = aws_iam_role.config_role.id
 
   policy = jsonencode({
@@ -51,7 +51,7 @@ resource "aws_iam_role_policy" "config_policy" {
 
 
 resource "aws_config_configuration_recorder" "recorder" {
-  name     = "${var.name_prefix}-recorder"
+  name     = "${var.common_tags["Name"]}-recorder"
   role_arn = aws_iam_role.config_role.arn
 
   recording_group {
@@ -61,7 +61,7 @@ resource "aws_config_configuration_recorder" "recorder" {
 }
 
 resource "aws_config_delivery_channel" "delivery" {
-  name           = "${var.name_prefix}-delivery-channel"
+  name           = "${var.common_tags["Name"]}-delivery-channel"
   s3_bucket_name = var.log_bucket_name
 
   snapshot_delivery_properties {

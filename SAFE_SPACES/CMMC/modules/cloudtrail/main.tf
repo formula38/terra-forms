@@ -1,5 +1,5 @@
 resource "aws_cloudtrail" "main" {
-  name                          = "${var.name_prefix}-trail"
+  name                          = "${var.common_tags["Name"]}-trail"
   s3_bucket_name                = var.log_bucket_name
   include_global_service_events = true
   is_multi_region_trail         = true
@@ -18,7 +18,7 @@ resource "aws_cloudtrail" "main" {
 
   tags = merge(
     {
-      Name        = "${var.name_prefix}-cloudtrail"
+      Name        = "${var.common_tags["Name"]}-cloudtrail"
       Environment = "prod"
     },
     var.common_tags

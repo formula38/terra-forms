@@ -1,8 +1,3 @@
-variable "name_prefix" {
-  description = "Prefix to use for resource names"
-  type        = string
-}
-
 variable "vpc_id" {
   description = "The ID of the VPC to attach flow logs to."
   type        = string

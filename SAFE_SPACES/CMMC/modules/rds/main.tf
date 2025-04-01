@@ -1,10 +1,10 @@
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "${var.name_prefix}-db-subnet"
+  name       = "${var.common_tags["Name"]}-db-subnet"
   subnet_ids = var.subnet_ids
 
   tags = merge(
     {
-      Name        = "${var.name_prefix}-db-subnet"
+      Name        = "${var.common_tags["Name"]}-db-subnet"
       Environment = var.environment
     },
     var.common_tags
@@ -12,7 +12,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier             = "${var.name_prefix}-postgres"
+  identifier             = "${var.common_tags["Name"]}-postgres"
   engine                 = var.engine
   engine_version         = var.engine_version
   instance_class         = var.instance_class
@@ -27,7 +27,7 @@ resource "aws_db_instance" "postgres" {
 
   tags = merge(
     {
-      Name        = "${var.name_prefix}-rds"
+      Name        = "${var.common_tags["Name"]}-rds"
       Environment = var.environment
     },
     var.common_tags

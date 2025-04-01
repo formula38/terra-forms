@@ -3,11 +3,6 @@ variable "account_id" {
   type        = string
 }
 
-variable "name_prefix" {
-  description = "Prefix to use for resource names"
-  type        = string
-}
-
 variable "data_bucket_name" {
   description = "Name of the data S3 bucket"
   type        = string

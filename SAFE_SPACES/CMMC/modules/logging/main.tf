@@ -11,7 +11,7 @@ resource "aws_cloudwatch_log_group" "cmmc_vpc_flow" {
 }
 
 resource "aws_iam_role" "cmmc_flow_role" {
-  name = "${var.name_prefix}-${var.flow_log_role_name}"
+  name = "${var.common_tags["Name"]}-${var.flow_log_role_name}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",

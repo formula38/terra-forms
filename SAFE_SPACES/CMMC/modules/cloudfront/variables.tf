@@ -1,8 +1,3 @@
-variable "name_prefix" {
-  description = "Prefix to use for resource names"
-  type        = string
-}
-
 variable "cloudfront_domain_aliases" {
   description = "A list of CNAMEs (aliases) to associate with the distribution."
   type        = list(string)

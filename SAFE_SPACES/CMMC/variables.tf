@@ -34,9 +34,7 @@ variable "ebs_device_name" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro"
 }
-
 
 # =============================
 # RDS Module
@@ -56,39 +54,33 @@ variable "db_password" {
 variable "engine" {
   description = "Database engine type (e.g., postgres, mysql)"
   type        = string
-  default     = "postgres"
 }
 
 variable "engine_version" {
   description = "Version of the database engine"
   type        = string
-  default     = "13.4"
 }
 
 variable "instance_class" {
   description = "The instance class for the RDS instance"
   type        = string
-  default     = "db.t3.micro"
 }
-
 
 variable "allocated_storage" {
   description = "Amount of allocated storage in GB"
   type        = number
-  default     = 20
 }
 
 variable "storage_encrypted" {
   description = "Whether to enable encryption at rest"
   type        = bool
-  default     = true
 }
 
 variable "skip_final_snapshot" {
   description = "Whether to skip final snapshot on DB deletion"
   type        = bool
-  default     = true
 }
+
 # =============================
 # Networking Module
 # =============================
@@ -190,7 +182,6 @@ variable "cost_center" {
 variable "retention_in_days" {
   description = "Retention period for CloudWatch logs"
   type        = number
-  default     = 90
 }
 
 variable "flow_log_group_name" {
@@ -220,17 +211,15 @@ variable "log_bucket_name" {
 variable "s3_acl" {
   description = "The ACL to apply to the S3 buckets"
   type        = string
-  default     = "private"
 }
 
 variable "sse_algorithm" {
   description = "The server-side encryption algorithm for S3 buckets"
   type        = string
-  default     = "aws:kms"
 }
 
 # =============================
-# Cloudfront
+# CloudFront & ACM
 # =============================
 
 variable "cloudfront_domain_aliases" {
@@ -238,14 +227,7 @@ variable "cloudfront_domain_aliases" {
   type        = list(string)
 }
 
-variable "cloudfront_waf_web_acl_id" {
-  description = "The WAF Web ACL ID to associate with this distribution."
-  type        = string
-  default     = null
-}
-
 variable "use_existing_route53" {
   description = "Flag to determine if an existing hosted zone should be used"
   type        = bool
-  default     = true
 }

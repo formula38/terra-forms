@@ -35,11 +35,12 @@ resource "aws_subnet" "subnet_a" {
 
   tags = merge(
     {
-      Name        = "${var.vpc_name}-subnet-a"
+      Name        = "${var.common_tags["Name"]}-${var.environment}-subnet-a"
       Environment = var.environment
     },
     var.common_tags
   )
+
 }
 
 resource "aws_subnet" "subnet_b" {
@@ -49,11 +50,12 @@ resource "aws_subnet" "subnet_b" {
 
   tags = merge(
     {
-      Name        = "${var.vpc_name}-subnet-b"
+      Name        = "${var.common_tags["Name"]}-${var.environment}-subnet-b"
       Environment = var.environment
     },
     var.common_tags
   )
+
 }
 
 resource "aws_route_table" "rt" {

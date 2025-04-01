@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_role" {
-  name = "${var.name_prefix}-ec2-role"
+  name = "${var.common_tags["Name"]}-ec2-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -11,7 +11,7 @@ resource "aws_iam_role" "ec2_role" {
 }
 
 resource "aws_iam_role_policy" "ec2_policy" {
-  name = "${var.name_prefix}-ec2-policy"
+  name = "${var.common_tags["Name"]}-ec2-policy"
   role = aws_iam_role.ec2_role.id
 
   policy = jsonencode({
@@ -62,7 +62,7 @@ resource "aws_iam_role_policy" "ec2_policy" {
 
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "${var.name_prefix}-instance-profile"
+  name = "${var.common_tags["Name"]}-instance-profile"
   role = aws_iam_role.ec2_role.name
 }
 
@@ -94,10 +94,9 @@ resource "aws_instance" "cmmc_ec2" {
 
   tags = merge(
     {
-      Name        = "${var.name_prefix}-ec2-instance"
+      Name        = "${var.common_tags["Name"]}-ec2-instance"
       Environment = var.environment
     },
     var.common_tags
   )
 }
-

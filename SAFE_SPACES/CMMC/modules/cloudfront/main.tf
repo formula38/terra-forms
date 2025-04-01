@@ -50,5 +50,5 @@ resource "aws_cloudfront_distribution" "secure_distribution" {
 }
 
 resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI for ${var.name_prefix}-cloudfront"
+  comment = "OAI for ${var.common_tags["Name"]}-cloudfront"
 }

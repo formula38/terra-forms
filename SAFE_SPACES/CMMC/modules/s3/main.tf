@@ -2,7 +2,7 @@ resource "aws_s3_bucket" "data" {
   bucket = var.data_bucket_name
   tags = merge(
     {
-      Name = "${var.name_prefix}-data"
+      Name = "${var.common_tags["Name"]}-data"
     },
     var.common_tags
   )
@@ -28,7 +28,7 @@ resource "aws_s3_bucket" "logs" {
   bucket = var.log_bucket_name
   tags = merge(
     {
-      Name = "${var.name_prefix}-logs"
+      Name = "${var.common_tags["Name"]}-logs"
     },
     var.common_tags
   )

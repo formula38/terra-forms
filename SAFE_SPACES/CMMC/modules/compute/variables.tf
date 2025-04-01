@@ -1,8 +1,3 @@
-variable "name_prefix" {
-  description = "Prefix for naming resources"
-  type        = string
-}
-
 variable "ami_id" {
   description = "AMI ID for EC2 instance"
   type        = string
