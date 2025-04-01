@@ -110,3 +110,11 @@ data_bucket_name = "data_bucket"
 log_bucket_name  = "log_bucket"
 s3_acl           = "private"
 sse_algorithm    = "aws:kms"
+
+# =============================
+# CLOUDFRONT Module
+# =============================
+
+cloudfront_domain_aliases = ["example.cmmcsecure.com"]
+
+use_existing_route53 = false

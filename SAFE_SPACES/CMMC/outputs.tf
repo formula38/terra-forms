@@ -60,6 +60,33 @@ output "log_bucket_name" {
   value = module.s3.log_bucket_name
 }
 
+# =============================
+# Cloudfront
+# =============================
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID"
+  value       = module.cloudfront.cloudfront_distribution_id
+}
+
+output "cloudfront_distribution_domain" {
+  description = "CloudFront distribution domain name"
+  value       = module.cloudfront.cloudfront_distribution_domain
+}
+
+output "route53_zone_id" {
+  value = module.route53.zone_id
+}
+
+output "waf_acl_arn" {
+  value = module.waf.waf_acl_arn
+}
+
+output "acm_certificate_arn" {
+  value = module.acm.acm_certificate_arn
+}
+
+
 # ============================
 # Compute Module Outputs
 # ============================

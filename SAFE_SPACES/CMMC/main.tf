@@ -70,6 +70,50 @@ module "s3" {
 }
 
 # =======================
+# 📦 CLOUDFRONT MODULE
+# =======================
+module "cloudfront" {
+  source                         = "./modules/cloudfront"
+  name_prefix                    = var.name_prefix
+  origin_bucket_name             = "${var.data_bucket_name}.s3.${var.region}.amazonaws.com"
+  cloudfront_domain_aliases      = var.cloudfront_domain_aliases
+  cloudfront_waf_web_acl_id      = var.cloudfront_waf_web_acl_id
+  cloudfront_acm_certificate_arn = module.acm.acm_certificate_arn
+
+  common_tags = local.common_tags
+}
+
+# =======================
+# 📦 ROUTE53 MODULE
+# =======================
+module "route53" {
+  source            = "./modules/route53"
+  domain_name       = var.cloudfront_domain_aliases[0]
+  use_existing_zone = var.use_existing_route53
+}
+
+# =======================
+# 📦 ACM MODULE
+# =======================
+module "acm" {
+  source                    = "./modules/acm"
+  domain_name               = var.cloudfront_domain_aliases[0]
+  subject_alternative_names = var.cloudfront_domain_aliases
+  route53_zone_id           = module.route53.zone_id
+
+  common_tags = local.common_tags
+}
+
+# =======================
+# 📦 WAF MODULE
+# =======================
+module "waf" {
+  source = "./modules/waf"
+
+  common_tags = local.common_tags
+}
+
+# =======================
 # 🖥️ EC2 COMPUTE MODULE
 # =======================
 module "compute" {

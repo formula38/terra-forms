@@ -229,3 +229,23 @@ variable "sse_algorithm" {
   default     = "aws:kms"
 }
 
+# =============================
+# Cloudfront
+# =============================
+
+variable "cloudfront_domain_aliases" {
+  description = "List of custom domain aliases for CloudFront"
+  type        = list(string)
+}
+
+variable "cloudfront_waf_web_acl_id" {
+  description = "The WAF Web ACL ID to associate with this distribution."
+  type        = string
+  default     = null
+}
+
+variable "use_existing_route53" {
+  description = "Flag to determine if an existing hosted zone should be used"
+  type        = bool
+  default     = true
+}
