@@ -12,26 +12,30 @@ resource "aws_wafv2_web_acl" "cloudfront_acl" {
     sampled_requests_enabled   = true
   }
 
-  rule {
-    name     = "AWSManagedRulesCommonRuleSet"
-    priority = 1
+  dynamic "rule" {
+  for_each = var.managed_rule_groups
+  content {
+    name     = rule.value.name
+    priority = rule.value.priority
+
     override_action {
       none {}
     }
 
     statement {
       managed_rule_group_statement {
-        name        = "AWSManagedRulesCommonRuleSet"
-        vendor_name = "AWS"
+        name        = rule.value.name
+        vendor_name = rule.value.vendor_name
       }
     }
 
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name                = "awsCommon"
+      metric_name                = rule.value.name
       sampled_requests_enabled   = true
     }
   }
+}
 
   tags = var.common_tags
 }
