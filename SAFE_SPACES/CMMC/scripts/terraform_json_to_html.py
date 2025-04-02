@@ -3,7 +3,6 @@ import sys
 import datetime
 import getpass
 
-# Simulated AWS monthly cost estimator by resource type (very rough heuristic)
 AWS_COST_ESTIMATES = {
     "aws_instance": 25.0,
     "aws_s3_bucket": 0.02,
@@ -55,9 +54,10 @@ def generate_html(plan_json):
         r_type = change.get("type", "")
         module = infer_module(name)
         action_type = next((a for a in ["create", "update", "delete"] if a in actions), "other")
-        grouped[action_type].setdefault(module, []).append((change, estimate_cost(r_type)))
+        cost = estimate_cost(r_type)
+        grouped[action_type].setdefault(module, []).append((change, cost))
         if "create" in actions:
-            total_cost += estimate_cost(r_type)
+            total_cost += cost
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -66,115 +66,111 @@ def generate_html(plan_json):
 <title>Terraform Plan Summary</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-    @media print {{
-        body {{ zoom: 80%; }}
-        .sidebar, .controls {{ display: none !important; }}
-    }}
-    body {{
-        font-family: 'Segoe UI', sans-serif;
-        background: #f4f6f9;
-        color: #333;
-        margin: 0;
-        padding: 0;
-    }}
-    .sidebar {{
-        width: 220px;
-        background: #1a1a2e;
-        color: white;
-        height: 100vh;
-        position: fixed;
-        top: 0; left: 0;
-        padding: 1em;
-        overflow-y: auto;
-    }}
-    .sidebar h2 {{ font-size: 1.2em; margin-top: 0; }}
-    .sidebar ul {{ list-style: none; padding: 0; }}
-    .sidebar ul li {{
-        padding: 8px 0;
-        cursor: pointer;
-        color: #ccc;
-    }}
-    .sidebar ul li:hover {{ color: white; }}
-    .main {{
-        margin-left: 240px;
-        padding: 2em;
-    }}
-    .meta, .controls {{ margin-bottom: 1em; }}
-    input, button {{
-        padding: 8px;
-        margin-right: 8px;
-        border-radius: 4px;
-        border: none;
-    }}
-    input {{ width: 250px; }}
-    button {{
-        background-color: #1a1a2e;
-        color: white;
-        cursor: pointer;
-    }}
-    .tab {{ display: none; }}
-    .tab.active {{ display: block; }}
-    .tabs {{ margin-top: 2em; }}
-    .tab-buttons {{
-        display: flex;
-        gap: 10px;
-        margin-bottom: 1em;
-        flex-wrap: wrap;
-    }}
-    .tab-buttons button {{
-        background: #1a1a2e;
-        color: white;
-        border: none;
-        border-radius: 4px;
-    }}
-    table {{
-        width: 100%;
-        border-collapse: collapse;
-    }}
-    th, td {{
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ccc;
-    }}
-    th {{ background: #eee; }}
-    .action-create {{ background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; }}
-    .action-update {{ background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; }}
-    .action-delete {{ background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; }}
-    .btn-icon {{
-        cursor: pointer;
-        margin-left: 8px;
-        color: #3498db;
-    }}
-    .modal-overlay {{
-        display: none;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 999;
-    }}
-    .modal {{
-        display: none;
-        position: fixed;
-        top: 5%;
-        left: 10%;
-        width: 80%;
-        height: 85%;
-        background: white;
-        color: black;
-        padding: 20px;
-        overflow: auto;
-        z-index: 1000;
-    }}
-    .modal pre {{
-        background: #f4f4f4;
-        padding: 1em;
-        overflow-x: auto;
-        white-space: pre-wrap;
-        word-break: break-word;
-    }}
+body {{
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f6f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}}
+.sidebar {{
+    width: 220px;
+    background: #1a1a2e;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    padding: 1em;
+    overflow-y: auto;
+}}
+.sidebar h2 {{ font-size: 1.2em; margin-top: 0; }}
+.sidebar ul {{ list-style: none; padding: 0; }}
+.sidebar ul li {{
+    padding: 8px 0;
+    cursor: pointer;
+    color: #ccc;
+}}
+.sidebar ul li:hover {{ color: white; }}
+.main {{
+    margin-left: 240px;
+    padding: 2em;
+}}
+.meta, .controls {{ margin-bottom: 1em; }}
+input, button {{
+    padding: 8px;
+    margin-right: 8px;
+    border-radius: 4px;
+    border: none;
+}}
+input {{ width: 250px; }}
+button {{
+    background-color: #1a1a2e;
+    color: white;
+    cursor: pointer;
+}}
+.tab {{ display: none; }}
+.tab.active {{ display: block; }}
+.tabs {{ margin-top: 2em; }}
+.tab-buttons {{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
+}}
+.tab-buttons button {{
+    background: #1a1a2e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}}
+.shared-table {{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}}
+.shared-table th, .shared-table td {{
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+}}
+.shared-table th {{ background: #eee; }}
+.action-create {{ background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; }}
+.action-update {{ background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; }}
+.action-delete {{ background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; }}
+.btn-icon {{
+    cursor: pointer;
+    margin-left: 8px;
+    color: #3498db;
+}}
+.modal-overlay {{
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+}}
+.modal {{
+    display: none;
+    position: fixed;
+    top: 5%;
+    left: 10%;
+    width: 80%;
+    height: 85%;
+    background: white;
+    color: black;
+    padding: 20px;
+    overflow: auto;
+    z-index: 1000;
+}}
+.modal pre {{
+    background: #f4f4f4;
+    padding: 1em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function openModal(id) {{
     document.getElementById('modal-overlay').style.display = 'block';
@@ -193,15 +189,6 @@ function toggleTab(id) {{
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }}
-function exportToPDF() {{
-    html2pdf().set({{
-        margin: 0.5,
-        filename: 'terraform_plan_summary.pdf',
-        image: {{ type: 'jpeg', quality: 0.98 }},
-        html2canvas: {{ scale: 2 }},
-        jsPDF: {{ unit: 'in', format: 'letter', orientation: 'portrait' }}
-    }}).from(document.body).save();
-}}
 function saveHTML() {{
     const blob = new Blob([document.documentElement.outerHTML], {{ type: 'text/html' }});
     const a = document.createElement('a');
@@ -211,12 +198,19 @@ function saveHTML() {{
 }}
 function searchResources() {{
     const q = document.getElementById("searchInput").value.toLowerCase();
-    document.querySelectorAll(".resource-row").forEach(row => {{
-        const match = row.textContent.toLowerCase().includes(q);
-        row.style.display = match ? "" : "none";
-        if (match) {{
-            row.closest(".tab").classList.add("active");
-        }}
+    document.querySelectorAll(".tab").forEach(tab => {{
+        let anyVisible = false;
+        tab.querySelectorAll(".module-group").forEach(group => {{
+            let groupVisible = false;
+            group.querySelectorAll(".resource-row").forEach(row => {{
+                const match = row.textContent.toLowerCase().includes(q);
+                row.style.display = match ? "" : "none";
+                if (match) groupVisible = true;
+            }});
+            group.style.display = groupVisible ? "" : "none";
+            if (groupVisible) anyVisible = true;
+        }});
+        tab.style.display = anyVisible ? "block" : "none";
     }});
 }}
 </script>
@@ -241,7 +235,6 @@ Estimated monthly AWS cost: <strong>${total_cost:.2f}</strong>
 </div>
 <div class="controls">
     <input type="text" id="searchInput" placeholder="Live search..." onkeyup="searchResources()">
-    <button onclick="exportToPDF()">📄 Export PDF</button>
     <button onclick="saveHTML()">💾 Save/Share HTML</button>
 </div>
 <div class="tabs">
@@ -254,7 +247,7 @@ Estimated monthly AWS cost: <strong>${total_cost:.2f}</strong>
             html += f'<button onclick="document.getElementById(\'{action}_{module}\').scrollIntoView();">{module}</button>'
         html += '</div>'
         for module, resources in modules.items():
-            html += f'<div id="{action}_{module}"><h3>{module}</h3><table><thead><tr><th>Type</th><th>Name</th><th>Action</th><th>Cost</th><th>Details</th></tr></thead><tbody>'
+            html += f'<div class="module-group" id="{action}_{module}"><h3>{module}</h3><table class="shared-table"><thead><tr><th>Type</th><th>Name</th><th>Action</th><th>Cost</th><th>Details</th></tr></thead><tbody>'
             for i, (res, cost) in enumerate(resources):
                 rid = f"{action}_{module}_{i}"
                 jstr = json.dumps(res, indent=2).replace("</script>", "<\\/script>")
