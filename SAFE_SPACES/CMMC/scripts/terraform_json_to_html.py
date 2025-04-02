@@ -2,23 +2,16 @@ import json
 import sys
 import datetime
 import getpass
+import os
+import sys
 
-AWS_COST_ESTIMATES = {
-    "aws_instance": 25.0,
-    "aws_s3_bucket": 0.02,
-    "aws_cloudfront_distribution": 2.5,
-    "aws_iam_role": 0,
-    "aws_kms_key": 1.0,
-    "aws_db_instance": 20.0,
-    "aws_subnet": 0,
-    "aws_security_group": 0,
-    "aws_vpc": 0,
-    "aws_lambda_function": 1.5,
-    "default": 0.5
-}
+# Add the estimator module path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+estimator_path = os.path.abspath(os.path.join(current_dir, "../terraform-cost-estimator"))
+sys.path.insert(0, estimator_path)
 
-def estimate_cost(resource_type):
-    return AWS_COST_ESTIMATES.get(resource_type, AWS_COST_ESTIMATES["default"])
+from estimator import estimate_cost  # ✅ Live pricing from your estimator.py
+
 
 def infer_module(name):
     name = name.lower()
@@ -54,7 +47,7 @@ def generate_html(plan_json):
         r_type = change.get("type", "")
         module = infer_module(name)
         action_type = next((a for a in ["create", "update", "delete"] if a in actions), "other")
-        cost = estimate_cost(r_type)
+        cost = estimate_cost(change)
         grouped[action_type].setdefault(module, []).append((change, cost))
         if "create" in actions:
             total_cost += cost
@@ -66,6 +59,7 @@ def generate_html(plan_json):
 <title>Terraform Plan Summary</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
+/* same styling from your last version — unchanged */
 body {{
     font-family: 'Segoe UI', sans-serif;
     background: #f4f6f9;
@@ -172,6 +166,7 @@ button {{
 }}
 </style>
 <script>
+/* same scripts from your last version — unchanged */
 function openModal(id) {{
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById(id).style.display = 'block';
