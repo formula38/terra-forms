@@ -14,7 +14,7 @@ logging.basicConfig(
 
 # Add the estimator module path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-estimator_path = os.path.abspath(os.path.join(current_dir, "../terraform-cost-estimator"))
+estimator_path = os.path.abspath(os.path.join(current_dir, "./terraform-cost-estimator"))
 sys.path.insert(0, estimator_path)
 
 from estimator import estimate_cost  # ✅ Live pricing from your estimator.py
