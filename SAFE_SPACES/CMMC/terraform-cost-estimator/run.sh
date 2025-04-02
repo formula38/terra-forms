@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  # Exit immediately if a command fails
+set -e  # Exit immediately on error
 
 PLAN_FILE="../cmmc_compliant_tfplan"
 PLAN_JSON="../cmmc_compliant_tfplan.json"
@@ -11,7 +11,7 @@ if [ ! -d "venv" ]; then
   python3 -m venv venv
   source venv/bin/activate
   pip install --upgrade pip
-  pip install boto3
+  pip install -r requirements.txt
 else
   source venv/bin/activate
 fi

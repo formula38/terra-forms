@@ -1,5 +1,6 @@
 import json
 import sys
+import pytz
 import datetime
 import getpass
 import os
@@ -34,7 +35,8 @@ def infer_module(name):
     return "General"
 
 def generate_html(plan_json):
-    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    pst = pytz.timezone('America/Los_Angeles')
+    timestamp = datetime.datetime.now(pst).strftime("%Y-%m-%d %I:%M:%S %p PST")
     user = getpass.getuser()
     resource_changes = plan_json.get("resource_changes", [])
 
