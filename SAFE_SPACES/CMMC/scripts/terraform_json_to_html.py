@@ -5,6 +5,12 @@ import datetime
 import getpass
 import os
 import sys
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)s:%(name)s:%(message)s'
+)
+
 
 # Add the estimator module path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,9 +40,14 @@ def infer_module(name):
         return "CDN"
     return "General"
 
+import logging
+
 def generate_html(plan_json):
+    import pytz
+    from datetime import datetime
+
     pst = pytz.timezone('America/Los_Angeles')
-    timestamp = datetime.datetime.now(pst).strftime("%Y-%m-%d %I:%M:%S %p PST")
+    timestamp = datetime.now(pst).strftime("%Y-%m-%d %I:%M:%S %p PST")
     user = getpass.getuser()
     resource_changes = plan_json.get("resource_changes", [])
 
@@ -49,8 +60,15 @@ def generate_html(plan_json):
         r_type = change.get("type", "")
         module = infer_module(name)
         action_type = next((a for a in ["create", "update", "delete"] if a in actions), "other")
+
+        # Use estimator with safe fallback
         cost = estimate_cost(change)
+        if cost is None:
+            logging.warning(f"No pricing found for {r_type} ({name}), defaulting to $0.00")
+            cost = 0.0
+
         grouped[action_type].setdefault(module, []).append((change, cost))
+
         if "create" in actions:
             total_cost += cost
 
