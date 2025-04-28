@@ -9,7 +9,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV /home/coldchainsecure/side_work/terraform_porjects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv
+setenv VIRTUAL_ENV /home/coldchainsecure/projects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/"bin":$PATH"

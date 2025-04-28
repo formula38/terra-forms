@@ -39,10 +39,10 @@ deactivate nondestructive
 if [ "${OSTYPE:-}" = "cygwin" ] || [ "${OSTYPE:-}" = "msys" ] ; then
     # transform D:\path\to\venv to /d/path/to/venv on MSYS
     # and to /cygdrive/d/path/to/venv on Cygwin
-    export VIRTUAL_ENV=$(cygpath /home/coldchainsecure/side_work/terraform_porjects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv)
+    export VIRTUAL_ENV=$(cygpath /home/coldchainsecure/projects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv)
 else
     # use the path as-is
-    export VIRTUAL_ENV=/home/coldchainsecure/side_work/terraform_porjects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv
+    export VIRTUAL_ENV=/home/coldchainsecure/projects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv
 fi
 
 _OLD_VIRTUAL_PATH="$PATH"

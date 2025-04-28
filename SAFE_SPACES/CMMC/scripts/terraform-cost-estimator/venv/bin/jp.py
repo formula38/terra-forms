@@ -1,4 +1,4 @@
-#!/home/coldchainsecure/side_work/terraform_porjects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv/bin/python3
+#!/home/coldchainsecure/projects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv/bin/python3
 
 import sys
 import json

@@ -11,6 +11,9 @@ logging.basicConfig(
     format='%(levelname)s:%(name)s:%(message)s'
 )
 
+theme_mode = "dark"  # default
+if len(sys.argv) >= 4:
+    theme_mode = sys.argv[3].lower()
 
 # Add the estimator module path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -78,8 +81,16 @@ def generate_html(plan_json):
 <meta charset="utf-8">
 <title>Terraform Plan Summary</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
+<style class="{theme_mode}">
 /* same styling from your last version — unchanged */
+style.dark {{
+    background: #0a0a0a;
+    color: #e0e0e0;
+}}
+style.light {{
+    background: #ffffff;
+    color: #333333;
+}}
 body {{
     font-family: 'Segoe UI', sans-serif;
     background: #f4f6f9;

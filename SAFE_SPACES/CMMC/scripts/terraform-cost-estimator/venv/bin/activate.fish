@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/coldchainsecure/side_work/terraform_porjects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv
+set -gx VIRTUAL_ENV /home/coldchainsecure/projects/terra-forms/SAFE_SPACES/CMMC/scripts/terraform-cost-estimator/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
