@@ -9,6 +9,8 @@ PLAN_FILE="${ROOT_DIR}/cmmc_compliant_tfplan"
 PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
 HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
 ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
+RAG_SCRIPT="${SCRIPT_DIR}/rag_inspector.py"
+FINDINGS_OUTPUT="${SCRIPT_DIR}/findings/compliance_violations.json"
 
 # --- ARGS ---
 MODE="full"
@@ -16,30 +18,13 @@ THEME="dark"
 
 for arg in "$@"; do
   case $arg in
-    --plan-only)
-      MODE="plan"
-      shift
-      ;;
-    --html-only)
-      MODE="html"
-      shift
-      ;;
-    --dark)
-      THEME="dark"
-      shift
-      ;;
-    --light)
-      THEME="light"
-      shift
-      ;;
-    --full)
-      MODE="full"
-      shift
-      ;;
-    *)
-      echo "Unknown option: $arg"
-      exit 1
-      ;;
+    --plan-only) MODE="plan"; shift ;;
+    --html-only) MODE="html"; shift ;;
+    --rag-only) MODE="rag"; shift ;;
+    --dark) THEME="dark"; shift ;;
+    --light) THEME="light"; shift ;;
+    --full) MODE="full"; shift ;;
+    *) echo "Unknown option: $arg"; exit 1 ;;
   esac
 done
 
@@ -54,9 +39,10 @@ fi
 source "${ESTIMATOR_DIR}/venv/bin/activate"
 echo "📦 Virtual environment activated."
 
-# --- Safe pip installation with system-managed Python (PEP 668 workaround) ---
+# --- DEPENDENCIES ---
 pip install --upgrade pip --break-system-packages
 pip install -r "${ESTIMATOR_DIR}/requirements.txt" --break-system-packages
+pip install langchain faiss-cpu ollama sentence-transformers pydantic --break-system-packages
 
 # --- FUNCTIONS ---
 run_terraform_plan() {
@@ -73,6 +59,13 @@ generate_html() {
   python3 terraform_json_to_html.py "${PLAN_JSON}" "${HTML_OUTPUT}" "${THEME}"
 }
 
+run_rag_inspector() {
+  echo "🧠 Running RAG-based compliance scan..."
+  mkdir -p "${SCRIPT_DIR}/findings"
+  python3 "${RAG_SCRIPT}" "${PLAN_JSON}"
+  echo "📄 RAG findings written to: ${FINDINGS_OUTPUT}"
+}
+
 # --- FLOW CONTROL ---
 case $MODE in
   plan)
@@ -81,9 +74,13 @@ case $MODE in
   html)
     generate_html
     ;;
+  rag)
+    run_rag_inspector
+    ;;
   full)
     run_terraform_plan
     generate_html
+    run_rag_inspector
     ;;
 esac
 

@@ -9,6 +9,8 @@ PLAN_FILE="${ROOT_DIR}/cmmc_compliant_tfplan"
 PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
 HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
 ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
+FINDINGS_DIR="${SCRIPT_DIR}/findings"
+RAG_SCRIPT="${SCRIPT_DIR}/rag_inspector.py"
 
 # --- ARGS ---
 MODE="full"
@@ -16,30 +18,12 @@ THEME="dark"
 
 for arg in "$@"; do
   case $arg in
-    --plan-only)
-      MODE="plan"
-      shift
-      ;;
-    --html-only)
-      MODE="html"
-      shift
-      ;;
-    --dark)
-      THEME="dark"
-      shift
-      ;;
-    --light)
-      THEME="light"
-      shift
-      ;;
-    --full)
-      MODE="full"
-      shift
-      ;;
-    *)
-      echo "Unknown option: $arg"
-      exit 1
-      ;;
+    --plan-only) MODE="plan" ;;
+    --html-only) MODE="html" ;;
+    --dark) THEME="dark" ;;
+    --light) THEME="light" ;;
+    --full) MODE="full" ;;
+    *) echo "Unknown option: $arg" && exit 1 ;;
   esac
 done
 
@@ -54,9 +38,18 @@ fi
 source "${ESTIMATOR_DIR}/venv/bin/activate"
 echo "📦 Virtual environment activated."
 
-# --- Safe pip installation with system-managed Python (PEP 668 workaround) ---
+# --- Install Python dependencies ---
 pip install --upgrade pip --break-system-packages
 pip install -r "${ESTIMATOR_DIR}/requirements.txt" --break-system-packages
+
+# RAG-specific dependencies
+RAG_REQUIREMENTS="${SCRIPT_DIR}/requirements-rag.txt"
+if [ -f "$RAG_REQUIREMENTS" ]; then
+  pip install -r "$RAG_REQUIREMENTS" --break-system-packages
+else
+  echo "langchain langchain-community langchain-ollama langchain-huggingface" > "$RAG_REQUIREMENTS"
+  pip install -r "$RAG_REQUIREMENTS" --break-system-packages
+fi
 
 # --- FUNCTIONS ---
 run_terraform_plan() {
@@ -73,6 +66,34 @@ generate_html() {
   python3 terraform_json_to_html.py "${PLAN_JSON}" "${HTML_OUTPUT}" "${THEME}"
 }
 
+check_ollama() {
+  echo "🔍 Checking Ollama availability..."
+  if ! command -v ollama &> /dev/null; then
+    echo "❌ Ollama is not installed."
+    if ping -c 1 ollama.com &> /dev/null; then
+      echo "📡 Internet detected. Installing Ollama..."
+      curl -fsSL https://ollama.com/install.sh | sh
+    else
+      echo "⚠️ No internet. Install Ollama manually: https://ollama.com"
+      exit 1
+    fi
+  fi
+
+  if ! ollama list | grep -q "mistral"; then
+    echo "⬇️ Pulling 'mistral' model..."
+    ollama pull mistral
+  else
+    echo "✅ Ollama and 'mistral' model are ready."
+  fi
+}
+
+run_rag_inspector() {
+  echo "🧠 Running air-gapped RAG Inspector..."
+  check_ollama
+  mkdir -p "${FINDINGS_DIR}"
+  python3 "${RAG_SCRIPT}" "${PLAN_JSON}"
+}
+
 # --- FLOW CONTROL ---
 case $MODE in
   plan)
@@ -84,6 +105,7 @@ case $MODE in
   full)
     run_terraform_plan
     generate_html
+    run_rag_inspector
     ;;
 esac
 
