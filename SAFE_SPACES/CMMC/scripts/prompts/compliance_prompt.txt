@@ -1,0 +1,56 @@
+# Compliance Reference Context for RAG Inspector
+# ------------------------------------------------------
+This document outlines key cloud infrastructure compliance controls for HIPAA, PCI-DSS, and FedRAMP. Use this context when evaluating Terraform configurations for violations or gaps. Your goal is to flag potential issues and suggest remediations based on this information.
+
+---
+
+## HIPAA (Health Insurance Portability and Accountability Act)
+
+- **Data Protection**: ePHI (electronic Protected Health Information) must be encrypted in transit and at rest using NIST-approved algorithms.
+- **Access Control**: Only authorized users should have access to systems storing or transmitting ePHI. Use IAM roles and least-privilege permissions.
+- **Audit Controls**: Enable logging (e.g., CloudTrail, VPC Flow Logs) to track access and modifications to sensitive data and infrastructure.
+- **Transmission Security**: Enforce HTTPS with valid SSL/TLS certs on all data transfer endpoints.
+- **Backup & Disaster Recovery**: Implement encrypted, versioned backups for critical infrastructure.
+- **Public Access Restrictions**: S3 buckets or compute services must NOT be publicly accessible unless explicitly required and documented.
+
+---
+
+## PCI-DSS (Payment Card Industry Data Security Standard)
+
+- **Network Segmentation**: Cardholder Data Environment (CDE) should be isolated using subnets, firewalls, and security groups.
+- **Data Encryption**: All sensitive cardholder data must be encrypted with strong cryptography (AES-256 or better).
+- **Multi-Factor Authentication**: Required for all administrative access to production systems.
+- **Logging & Monitoring**: Enable continuous log collection, retention, and review of system activity related to cardholder data.
+- **Access Control**: Grant access to systems storing cardholder data only on a need-to-know basis.
+- **Patch Management**: Ensure instances use up-to-date AMIs and perform regular package updates.
+
+---
+
+## FedRAMP (Federal Risk and Authorization Management Program)
+
+- **FIPS-validated Encryption**: All data encryption must comply with FIPS 140-2 standards.
+- **Boundary Protection**: Ensure VPCs, subnets, and firewalls enforce strict ingress/egress control.
+- **Resource Tagging**: Tag all resources with sensitivity classification (e.g., LOW, MODERATE, HIGH).
+- **Identity & Access Management**: Enforce RBAC using IAM roles with fine-grained policies.
+- **Security Assessment & Continuous Monitoring**: Enable AWS Config, GuardDuty, and Security Hub for asset monitoring and compliance auditing.
+- **Data Residency**: Ensure data stays within designated US Gov or FedRAMP-approved regions.
+- **Public Exposure Restrictions**: CloudFront, ALBs, S3, or EC2 must not expose unprotected systems to the internet.
+
+---
+
+## Evaluation Instructions
+
+When analyzing Terraform plans:
+1. Identify resource misconfigurations that violate the above standards.
+2. Output violations as structured JSON with:
+   - `resource_type`
+   - `resource_name`
+   - `compliance_concern`
+   - `severity` (Low, Medium, High)
+   - `remediation`
+
+Only include resources where a clear violation or risk is present. Your goal is to act as a compliance auditor scanning the infrastructure for issues before deployment.
+
+---
+
+End of context.

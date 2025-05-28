@@ -10,7 +10,7 @@ PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
 HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
 ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
 FINDINGS_DIR="${SCRIPT_DIR}/findings"
-RAG_SCRIPT="${SCRIPT_DIR}/rag_inspector.py"
+RAG_SCRIPT="${SCRIPT_DIR}/rag_inspector_2.py"
 
 # --- ARGS ---
 MODE="full"
