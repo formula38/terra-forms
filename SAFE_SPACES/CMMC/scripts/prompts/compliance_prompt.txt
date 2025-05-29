@@ -6,51 +6,75 @@ This document outlines key cloud infrastructure compliance controls for HIPAA, P
 
 ## HIPAA (Health Insurance Portability and Accountability Act)
 
-- **Data Protection**: ePHI (electronic Protected Health Information) must be encrypted in transit and at rest using NIST-approved algorithms.
-- **Access Control**: Only authorized users should have access to systems storing or transmitting ePHI. Use IAM roles and least-privilege permissions.
-- **Audit Controls**: Enable logging (e.g., CloudTrail, VPC Flow Logs) to track access and modifications to sensitive data and infrastructure.
-- **Transmission Security**: Enforce HTTPS with valid SSL/TLS certs on all data transfer endpoints.
-- **Backup & Disaster Recovery**: Implement encrypted, versioned backups for critical infrastructure.
-- **Public Access Restrictions**: S3 buckets or compute services must NOT be publicly accessible unless explicitly required and documented.
+- **Data Protection**: ePHI must be encrypted in transit and at rest using NIST-approved algorithms.
+- **Access Control**: Only authorized users via least-privilege IAM roles.
+- **Audit Controls**: Enable logging (CloudTrail, VPC Flow Logs).
+- **Transmission Security**: Enforce HTTPS with valid SSL/TLS.
+- **Backup & DR**: Encrypted, versioned backups.
+- **Public Access**: No publicly accessible S3 buckets or compute.
 
 ---
 
 ## PCI-DSS (Payment Card Industry Data Security Standard)
 
-- **Network Segmentation**: Cardholder Data Environment (CDE) should be isolated using subnets, firewalls, and security groups.
-- **Data Encryption**: All sensitive cardholder data must be encrypted with strong cryptography (AES-256 or better).
-- **Multi-Factor Authentication**: Required for all administrative access to production systems.
-- **Logging & Monitoring**: Enable continuous log collection, retention, and review of system activity related to cardholder data.
-- **Access Control**: Grant access to systems storing cardholder data only on a need-to-know basis.
-- **Patch Management**: Ensure instances use up-to-date AMIs and perform regular package updates.
+- **Network Segmentation**: Isolate CDE with subnets, firewalls, security groups.
+- **Encryption**: AES-256+ for all cardholder data.
+- **MFA**: Required for all administrative logins.
+- **Logging & Monitoring**: Continuous collection and review of logs.
+- **Access Control**: Need-to-know basis.
+- **Patch Management**: Up-to-date AMIs and OS packages.
 
 ---
 
 ## FedRAMP (Federal Risk and Authorization Management Program)
 
-- **FIPS-validated Encryption**: All data encryption must comply with FIPS 140-2 standards.
-- **Boundary Protection**: Ensure VPCs, subnets, and firewalls enforce strict ingress/egress control.
-- **Resource Tagging**: Tag all resources with sensitivity classification (e.g., LOW, MODERATE, HIGH).
-- **Identity & Access Management**: Enforce RBAC using IAM roles with fine-grained policies.
-- **Security Assessment & Continuous Monitoring**: Enable AWS Config, GuardDuty, and Security Hub for asset monitoring and compliance auditing.
-- **Data Residency**: Ensure data stays within designated US Gov or FedRAMP-approved regions.
-- **Public Exposure Restrictions**: CloudFront, ALBs, S3, or EC2 must not expose unprotected systems to the internet.
+- **FIPS Encryption**: Comply with FIPS 140-2.
+- **Boundary Protection**: Strict ingress/egress controls on VPCs/subnets.
+- **Tagging**: Sensitivity classification (LOW/MODERATE/HIGH).
+- **IAM**: RBAC with fine-grained policies.
+- **Continuous Monitoring**: AWS Config, GuardDuty, Security Hub.
+- **Data Residency**: US Gov or FedRAMP-approved regions.
+- **Public Exposure**: No unprotected internet-facing systems.
 
 ---
 
-## Evaluation Instructions
+## Violation Categories to Flag
 
-When analyzing Terraform plans:
-1. Identify resource misconfigurations that violate the above standards.
-2. Output violations as structured JSON with:
-   - `resource_type`
+When you scan the plan, look specifically for any of these misconfigurations:
+
+- **Public S3 Buckets** → `compliance_concern`: "Public S3"
+- **Unencrypted Storage** (EBS, RDS, S3) → "Unencrypted Storage"
+- **Overly Broad IAM** (wildcard `*` actions or principals) → "Overly Broad IAM"
+- **Logging Disabled** (CloudTrail/VPC Flow Logs off) → "Logging Disabled"
+- **Open Ingress** (0.0.0.0/0 on security group ingress) → "Open Ingress"
+- **Open Egress** (0.0.0.0/0 on security group egress) → "Open Egress"
+- **Missing MFA** on admin roles → "Missing MFA"
+- **Public Exposure** of load balancers or compute without auth → "Public Exposure"
+
+---
+
+## Cross-Resource Validation
+
+When evaluating a violation, cross-check related resources that could remediate or contradict it. For example:
+
+- If an `aws_s3_bucket` shows `compliance_concern: "Unencrypted Storage"`, verify if a separate resource like `aws_s3_bucket_server_side_encryption_configuration` exists for **the same** bucket. If encryption is correctly configured, do **not** flag that bucket.
+- If a bucket policy later blocks public access (`aws_s3_bucket_public_access_block`) for the same bucket name, suppress any earlier "Public S3" finding for that bucket.
+- For security groups, if a rule opens egress but a subsequent network ACL explicitly denies that traffic on the same CIDR/port, suppress the SG-level egress finding.
+
+Always prefer the most restrictive configuration when multiple resources apply to the same entity.
+
+---
+
+## Output Format
+
+Output a single **raw JSON object** (no markdown fences, no prose) with two keys:
+1. `violations` — an array of objects, each with exactly these six fields:
+   - `resource_type` (e.g., "aws_s3_bucket")
    - `resource_name`
    - `compliance_concern`
-   - `severity` (Low, Medium, High)
-   - `remediation`
+   - `standard` (HIPAA | PCI-DSS | FedRAMP)
+   - `severity` (Low / Medium / High)
+   - `remediation` (Short suggested fix)
+2. `recommendations` — an array of high-level best-practice recommendations based on the aggregated violations (e.g., "Enable bucket encryption by default", "Implement least-privilege IAM policies").
 
-Only include resources where a clear violation or risk is present. Your goal is to act as a compliance auditor scanning the infrastructure for issues before deployment.
-
----
-
-End of context.
+Do **not** include any explanation or extra fields—only the raw JSON object with `violations` and `recommendations`.

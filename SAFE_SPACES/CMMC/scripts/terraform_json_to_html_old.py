@@ -1,20 +1,17 @@
-#!/usr/bin/env python3
 import json
 import sys
 import pytz
 import datetime
 import getpass
 import os
+import sys
 import logging
-
-# Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(levelname)s:%(name)s:%(message)s'
 )
 
-# Theme mode
-theme_mode = "dark"
+theme_mode = "dark"  # default
 if len(sys.argv) >= 4:
     theme_mode = sys.argv[3].lower()
 
@@ -22,9 +19,10 @@ if len(sys.argv) >= 4:
 current_dir = os.path.dirname(os.path.abspath(__file__))
 estimator_path = os.path.abspath(os.path.join(current_dir, "./terraform-cost-estimator"))
 sys.path.insert(0, estimator_path)
-from estimator import estimate_cost  # Live pricing
 
-# Function to infer module grouping
+from estimator import estimate_cost  # ✅ Live pricing from your estimator.py
+
+
 def infer_module(name):
     name = name.lower()
     if "vpc" in name or "subnet" in name or "route" in name:
@@ -45,38 +43,38 @@ def infer_module(name):
         return "CDN"
     return "General"
 
-# Generate HTML
-def generate_html(plan_json, compliance_json):
+import logging
+
+def generate_html(plan_json):
+    import pytz
+    from datetime import datetime
+
     pst = pytz.timezone('America/Los_Angeles')
-    timestamp = datetime.datetime.now(pst).strftime("%Y-%m-%d %I:%M:%S %p PST")
+    timestamp = datetime.now(pst).strftime("%Y-%m-%d %I:%M:%S %p PST")
     user = getpass.getuser()
     resource_changes = plan_json.get("resource_changes", [])
 
-    # Group resources and compute cost
     grouped = {"create": {}, "update": {}, "delete": {}, "other": {}}
     total_cost = 0.0
+
     for change in resource_changes:
         actions = change.get("change", {}).get("actions", [])
         name = change.get("name", "")
         r_type = change.get("type", "")
         module = infer_module(name)
         action_type = next((a for a in ["create", "update", "delete"] if a in actions), "other")
-        cost = estimate_cost(change) or 0.0
-        if cost == 0.0:
+
+        # Use estimator with safe fallback
+        cost = estimate_cost(change)
+        if cost is None:
             logging.warning(f"No pricing found for {r_type} ({name}), defaulting to $0.00")
+            cost = 0.0
+
         grouped[action_type].setdefault(module, []).append((change, cost))
+
         if "create" in actions:
             total_cost += cost
 
-    # Prepare compliance section data
-    violations = compliance_json.get('violations', [])
-    recommendations = compliance_json.get('recommendations', [])
-    # Count severities
-    sev_counts = {lvl: 0 for lvl in ['High','Medium','Low']}
-    for v in violations:
-        sev_counts[v['severity']] += 1
-
-    # Begin HTML
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,6 +82,7 @@ def generate_html(plan_json, compliance_json):
 <title>Terraform Plan Summary</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style class="{theme_mode}">
+/* same styling from your last version — unchanged */
 style.dark {{
     background: #0a0a0a;
     color: #e0e0e0;
@@ -198,6 +197,7 @@ button {{
 }}
 </style>
 <script>
+/* same scripts from your last version — unchanged */
 function openModal(id) {{
     document.getElementById('modal-overlay').style.display = 'block';
     document.getElementById(id).style.display = 'block';
@@ -249,7 +249,6 @@ function searchResources() {{
         <li onclick="toggleTab('update')">✏️ Update</li>
         <li onclick="toggleTab('delete')">🗑️ Delete</li>
         <li onclick="toggleTab('other')">❓ Other</li>
-        <li onclick="toggleTab('compliance')">🛡️ Compliance</li>
     </ul>
 </div>
 <div class="main">
@@ -266,130 +265,43 @@ Estimated monthly AWS cost: <strong>${total_cost:.2f}</strong>
 </div>
 <div class="tabs">
 """
-    # Resource tabs
+
     for action in ["create", "update", "delete", "other"]:
         modules = grouped[action]
         html += f'<div class="tab" id="{action}"><div class="tab-buttons">'
         for module in modules:
-            html += (
-                f'<button onclick="document.getElementById(\'{action}_{module}\')'
-                f'.scrollIntoView();">{module}</button>'
-            )
+            html += f'<button onclick="document.getElementById(\'{action}_{module}\').scrollIntoView();">{module}</button>'
         html += '</div>'
-
         for module, resources in modules.items():
-            html += (
-                f'<div class="module-group" id="{action}_{module}">'
-                f'<h3>{module}</h3>'
-                '<table class="shared-table">'
-                '<thead>'
-                '<tr><th>Type</th><th>Name</th><th>Action</th><th>Cost</th><th>Details</th></tr>'
-                '</thead>'
-                '<tbody>'
-            )
-
+            html += f'<div class="module-group" id="{action}_{module}"><h3>{module}</h3><table class="shared-table"><thead><tr><th>Type</th><th>Name</th><th>Action</th><th>Cost</th><th>Details</th></tr></thead><tbody>'
             for i, (res, cost) in enumerate(resources):
                 rid = f"{action}_{module}_{i}"
                 jstr = json.dumps(res, indent=2).replace("</script>", "<\\/script>")
-                html += f"""
-                <tr class="resource-row">
-                  <td>{res.get('type')}</td>
-                  <td>{res.get('name')}</td>
-                  <td><span class="action-{action}">{action.upper()}</span></td>
-                  <td>${cost:.2f}</td>
-                  <td>
-                    <span class="btn-icon" onclick="openModal('modal_{rid}')">
-                      <i class="fas fa-eye"></i>
-                    </span>
-                    <span class="btn-icon" onclick="copyToClipboard('json_{rid}')">
-                      <i class="fas fa-copy"></i>
-                    </span>
-                  </td>
+                html += f"""<tr class="resource-row">
+                    <td>{res.get("type")}</td>
+                    <td>{res.get("name")}</td>
+                    <td><span class="action-{action}">{action.upper()}</span></td>
+                    <td>${cost:.2f}</td>
+                    <td>
+                        <span class="btn-icon" onclick="openModal('modal_{rid}')"><i class="fas fa-eye"></i></span>
+                        <span class="btn-icon" onclick="copyToClipboard('json_{rid}')"><i class="fas fa-copy"></i></span>
+                    </td>
                 </tr>
                 <div class="modal" id="modal_{rid}">
-                  <button onclick="closeModal('modal_{rid}')">Close</button>
-                  <pre id="json_{rid}">{jstr}</pre>
-                </div>
-                """
-
+                    <button onclick="closeModal('modal_{rid}')">Close</button>
+                    <pre id="json_{rid}">{jstr}</pre>
+                </div>"""
             html += "</tbody></table></div>"
+        html += "</div>"
 
-        html += "</div>"  # close each resource tab
-
-    # Compliance tab
-    html += '<div class="tab" id="compliance"><h2>Compliance Findings</h2>'
-    html += '<div class="cards">'
-    for level in ['High', 'Medium', 'Low']:
-        html += (
-            f'<div class="card">'
-            f'<h3>{level} Severity</h3>'
-            f'<p>{sev_counts[level]} issue{"s" if sev_counts[level] != 1 else ""}</p>'
-            '</div>'
-        )
-    html += '</div>'
-
-    # Violations table
-    html += '''
-      <table class="shared-table">
-        <thead>
-          <tr>
-            <th>Resource</th>
-            <th>Concern</th>
-            <th>Standard</th>
-            <th>Severity</th>
-            <th>Remediation</th>
-          </tr>
-        </thead>
-        <tbody>
-    '''
-    for v in violations:
-        res = f"{v['resource_type']}.{v['resource_name']}"
-        html += (
-            '<tr>'
-            f'<td>{res}</td>'
-            f'<td>{v["compliance_concern"]}</td>'
-            f'<td>{v["standard"]}</td>'
-            f'<td>{v["severity"]}</td>'
-            f'<td>{v["remediation"]}</td>'
-            '</tr>'
-        )
-    html += '</tbody></table>'
-
-    # Recommendations
-    if recommendations:
-        html += '<h3>Recommendations</h3><ul>'
-        for rec in recommendations:
-            html += f'<li>{rec}</li>'
-        html += '</ul>'
-
-    html += '</div>'    # (1) close <div class="tab" id="compliance">
-    html += '</div>'    # (2) close <div class="tabs">
-    html += '</div>'    # (3) close <div class="main">
-    html += '<div id="modal-overlay" class="modal-overlay"></div>'
-    html += '</body></html>'
-
+    html += """</div></div><div id="modal-overlay" class="modal-overlay"></div></body></html>"""
     return html
 
-# Main
 if __name__ == "__main__":
     tf_json_path = sys.argv[1]
     html_output_path = sys.argv[2]
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    compliance_json_path = os.path.join(
-        script_dir,
-        'findings',
-        'compliance_violations.json'
-    )
     with open(tf_json_path, "r") as f:
         tf_data = json.load(f)
-    with open(compliance_json_path, "r") as f:
-        comp_data = json.load(f)
-    if isinstance(comp_data, list):
-        comp_data = {
-        "violations": comp_data,
-        "recommendations": []
-        }
-    html = generate_html(tf_data, comp_data)
+    html = generate_html(tf_data)
     with open(html_output_path, "w") as f:
         f.write(html)
-        
