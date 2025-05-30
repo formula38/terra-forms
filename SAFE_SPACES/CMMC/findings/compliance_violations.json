@@ -1,0 +1,25 @@
+{
+  "violations": [
+    {
+      "resource_type": "aws_s3_bucket",
+      "resource_name": "logs_block",
+      "compliance_concern": "Public S3",
+      "standard": "HIPAA",
+      "severity": "High",
+      "remediation": "Set `restrict_public_buckets` to false in the configuration of logs_block bucket"
+    },
+    {
+      "resource_type": "aws_s3_bucket",
+      "resource_name": "logs_block",
+      "compliance_concern": "Unencrypted Storage",
+      "standard": "HIPAA",
+      "severity": "High",
+      "remediation": "Add encryption configuration for logs_block bucket"
+    }
+  ],
+  "recommendations": [
+    "Implement least-privilege IAM policies across all resources",
+    "Ensure proper use of bucket policies and access control lists",
+    "Enable logging (CloudTrail, VPC Flow Logs) for continuous monitoring"
+  ]
+}

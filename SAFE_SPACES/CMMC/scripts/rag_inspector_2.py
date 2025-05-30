@@ -4,8 +4,9 @@
 import re
 import json
 import argparse
+from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Literal
 
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import FAISS
@@ -15,19 +16,42 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from pydantic import BaseModel, Field, ValidationError
 
+# --- Enum definitions ---
+class ComplianceStandard(str, Enum):
+    HIPAA = "HIPAA"
+    PCI_DSS = "PCI-DSS"
+    FedRAMP = "FedRAMP"
+    CMMC = "CMMC"
+    GDPR = "GDPR"
+    GLBA = "GLBA"
+    ISO_27001 = "ISO_27001"
+    NIST = "NIST"
+    SOC_2 = "SOC 2"
+    SOX = "SOX"
+    CIS_AWS = "CIS AWS"
+
+class SeverityLevel(str, Enum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
 # --- Pydantic Model for Output Validation ---
 class ComplianceViolation(BaseModel):
-    resource_type: str = Field(..., description="Terraform AWS resource type")
-    resource_name: str = Field(..., description="Resource name as defined in TF")
-    compliance_concern: str = Field(..., description="What compliance issue it violates")
-    standard: str = Field(..., description="HIPAA | PCI-DSS | FedRAMP")
-    severity: str = Field(..., description="Low / Medium / High")
-    remediation: str = Field(..., description="Suggested fix for the violation")
+    resource_type: str = Field(..., description="Terraform AWS resource type, e.g., aws_s3_bucket")
+    resource_name: str = Field(..., description="Resource name as defined in the Terraform configuration")
+    compliance_concern: str = Field(..., description="Description of the specific compliance violation or risk")
+    standard: ComplianceStandard = Field(..., description="Applicable compliance framework")
+    severity: SeverityLevel = Field(..., description="Severity of the violation")
+    remediation: str = Field(..., description="Suggested short fix or mitigation for the violation")
 
 # --- Argument Parsing ---
 parser = argparse.ArgumentParser(description="RAG compliance analyzer for Terraform plans")
 parser.add_argument("plan_json", help="Path to Terraform plan JSON")
+parser.add_argument("output_path", help="Path to save compliance JSON")
 args = parser.parse_args()
+
+output_path = Path(args.output_path)
+
 
 # --- Load Terraform Plan JSON ---
 with open(args.plan_json, "r") as f:
@@ -49,28 +73,37 @@ retriever = db.as_retriever()
 llm = OllamaLLM(model="mistral")
 
 # --- Load & Enhance Prompt Template ---
-prompt_path = Path("prompts/compliance_prompt.txt")
+script_dir = Path(__file__).parent.resolve()
+prompt_path = script_dir / "prompts" / "compliance_prompt_detailed_all.txt"
 if not prompt_path.exists():
-    raise FileNotFoundError("Prompt template not found at prompts/compliance_prompt.txt")
+    raise FileNotFoundError(f"Prompt template not found at {prompt_path}")
+
 
 prompt_template = prompt_path.read_text().strip()
 # Append enforcement of JSON output, fields, and cross-resource validation instructions
 template_suffix = """
+You must return a single JSON object with **exactly two keys**:
+- "violations": a list of objects, each with **exactly** these six fields:
+    - resource_type
+    - resource_name
+    - compliance_concern
+    - standard (must be one of: HIPAA, PCI-DSS, FedRAMP)
+    - severity (Low, Medium, or High)
+    - remediation (a short fix recommendation)
+- "recommendations": a list of 3–5 short, high-level actions to improve overall compliance posture.
 
-IMPORTANT: **Only** output a JSON array of objects, each object **must** include exactly these six fields (no more, no fewer):
-- resource_type
-- resource_name
-- compliance_concern
-- standard  (HIPAA | PCI-DSS | FedRAMP)
-- severity   (Low / Medium / High)
-- remediation  (Short suggested fix for the violation)
+❗ Strict formatting rules:
+- Output must be **a single JSON object** — no markdown, no prose, no code fences.
+- Do not include any extra commentary or explanation.
 
-Apply cross-resource validation:
-- If an encryption resource exists for the same bucket, suppress the Unencrypted Storage finding.
-- If a public-access-block resource exists for the same bucket, suppress the Public S3 finding.
-- If a network ACL denies traffic that a security group allows, suppress the SG-level finding.
+🔍 Cross-resource validation rules:
+- If an encryption config exists for a bucket, omit any “Unencrypted Storage” violation for it.
+- If a public-access-block resource exists for a bucket, omit any “Public S3” finding.
+- If a network ACL blocks traffic allowed by a security group, omit the SG-level finding.
 
-Do **not** include any explanation, markdown fences, code blocks, or prose—only the raw JSON array of objects."""
+🚫 Do not output a raw array. Only return a well-formed JSON object with the two required keys.
+"""
+
 prompt_template += template_suffix
 
 # --- Build RAG Chain ---
@@ -97,25 +130,44 @@ raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
 raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
 
 # --- Attempt JSON parse and Pydantic validation ---
-output_path = Path("findings/compliance_violations.json")
 output_path.parent.mkdir(parents=True, exist_ok=True)
+raw_path = output_path.with_suffix(".raw.txt")
+
+with open(raw_path, "w") as f:
+    f.write(raw)
 
 try:
     parsed = json.loads(raw)
-    if not isinstance(parsed, list):
-        raise ValueError("Expected a JSON array at top level")
+    if not isinstance(parsed, dict):
+        raise ValueError("Expected top-level JSON object")
+
+    violations_raw = parsed.get("violations", [])
+    recommendations = parsed.get("recommendations", [])
 
     violations: List[ComplianceViolation] = []
-    for idx, item in enumerate(parsed):
+    for item in violations_raw:
         violations.append(ComplianceViolation(**item))
 
-    with open(output_path, "w") as f:
-        json.dump([v.model_dump() for v in violations], f, indent=2)
+    report = {
+        "violations": [v.model_dump() for v in violations],
+        "recommendations": recommendations if isinstance(recommendations, list) else []
+    }
 
+    with open(output_path, "w") as f:
+        json.dump(report, f, indent=2)
     print(f"✅ Compliance check complete. Results saved to: {output_path}")
 
 except (json.JSONDecodeError, ValidationError, ValueError) as e:
+    print("❌ Failed to parse/validate LLM output:", e)
+    print(f"⚠️ Skipping update to: {output_path} — raw text written to: {raw_path}")
+
+
+
+
+# 🛑 If JSON output from LLM is invalid (e.g. malformed or missing fields)
+except (json.JSONDecodeError, ValidationError, ValueError) as e:
     print("❌ Failed to parse or validate JSON:", e)
+    # still write out raw text to aid debugging
     with open(output_path, "w") as f:
         f.write(raw)
     print(f"🔖 Raw output saved to: {output_path}")

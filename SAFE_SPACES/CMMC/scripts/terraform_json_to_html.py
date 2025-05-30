@@ -52,6 +52,11 @@ def generate_html(plan_json, compliance_json):
     user = getpass.getuser()
     resource_changes = plan_json.get("resource_changes", [])
 
+    # DEBUG: how many violations did we load?
+    violations = (compliance_json if isinstance(compliance_json, list)
+                    else compliance_json.get("violations", []))
+    logging.info(f"🔍 Loaded {len(violations)} compliance violations")
+
     # Group resources and compute cost
     grouped = {"create": {}, "update": {}, "delete": {}, "other": {}}
     total_cost = 0.0
@@ -382,13 +387,26 @@ if __name__ == "__main__":
     )
     with open(tf_json_path, "r") as f:
         tf_data = json.load(f)
-    with open(compliance_json_path, "r") as f:
-        comp_data = json.load(f)
-    if isinstance(comp_data, list):
+    import logging
+    try:
+        with open(compliance_json_path, "r") as f:
+            comp_data = json.load(f)
+        if not isinstance(comp_data, dict) or "violations" not in comp_data:
+            logging.warning("⚠️ Invalid compliance_violations.json structure — skipping compliance tab.")
+            comp_data = {"violations": [], "recommendations": []}
+        else:
+            logging.info(f"🔍 Loaded {len(comp_data['violations'])} compliance violations")
+    except Exception as e:
+        logging.warning(f"⚠️ No valid compliance_violations.json found — skipping compliance tab.\nReason: {e}")
+        comp_data = {"violations": [], "recommendations": []}
+
+    except (FileNotFoundError, json.JSONDecodeError):
+        logging.warning("⚠️ No valid compliance_violations.json found — skipping compliance tab.")
         comp_data = {
-        "violations": comp_data,
-        "recommendations": []
+            "violations": [],
+            "recommendations": []
         }
+
     html = generate_html(tf_data, comp_data)
     with open(html_output_path, "w") as f:
         f.write(html)

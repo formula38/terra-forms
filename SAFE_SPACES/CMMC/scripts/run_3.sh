@@ -91,8 +91,12 @@ run_rag_inspector() {
   echo "🧠 Running air-gapped RAG Inspector..."
   check_ollama
   mkdir -p "${FINDINGS_DIR}"
-  python3 "${RAG_SCRIPT}" "${PLAN_JSON}"
+  python3 "${RAG_SCRIPT}" "${PLAN_JSON}" "${FINDINGS_DIR}/compliance_violations.json"
 }
+
+if [[ -f "${FINDINGS_DIR}/compliance_violations.raw.txt" ]]; then
+  echo "🕵️ Raw LLM response saved to compliance_violations.raw.txt for inspection."
+fi
 
 # --- FLOW CONTROL ---
 case $MODE in
@@ -104,8 +108,8 @@ case $MODE in
     ;;
   full)
     run_terraform_plan
-    generate_html
     run_rag_inspector
+    generate_html
     ;;
 esac
 
