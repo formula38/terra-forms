@@ -340,7 +340,7 @@ Estimated monthly AWS cost: <strong>${total_cost:.2f}</strong>
           <tr>
             <th>Resource</th>
             <th>Concern</th>
-            <th>Standard</th>
+            <th>Standards</th>
             <th>Severity</th>
             <th>Remediation</th>
           </tr>
@@ -353,7 +353,7 @@ Estimated monthly AWS cost: <strong>${total_cost:.2f}</strong>
             '<tr>'
             f'<td>{res}</td>'
             f'<td>{v["compliance_concern"]}</td>'
-            f'<td>{v["standard"]}</td>'
+            f'<td>{v["standards"]}</td>'
             f'<td>{v["severity"]}</td>'
             f'<td>{v["remediation"]}</td>'
             '</tr>'

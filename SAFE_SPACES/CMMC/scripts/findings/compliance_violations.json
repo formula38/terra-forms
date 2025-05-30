@@ -1,34 +1,42 @@
 {
   "violations": [
     {
-      "resource_type": "aws_security_group",
-      "resource_name": "main_sg",
-      "compliance_concern": "Allows all outbound traffic on port 0, which is not recommended.",
-      "standard": "PCI-DSS",
-      "severity": "High",
-      "remediation": "Restrict outbound rules to necessary ports."
-    },
-    {
-      "resource_type": "aws_s3_bucket_policy",
-      "resource_name": "data_policy",
-      "compliance_concern": "Policy uses wildcard in action, which may not be compliant with SOC 2, ISO 27001, and HIPAA.",
-      "standard": "SOC 2",
-      "severity": "Medium",
-      "remediation": "Review and refine the IAM policy to remove any unnecessary wildcards."
-    },
-    {
       "resource_type": "aws_route53_record",
       "resource_name": "cert_validation",
-      "compliance_concern": "No encryption or backup config provided, which may not be compliant with HIPAA, CMMC, SOX, GLBA.",
-      "standard": "HIPAA",
+      "compliance_concern": "DNS records are not secured with SSL/TLS encryption.",
+      "standards": [
+        "CMMC",
+        "NIST"
+      ],
       "severity": "Medium",
-      "remediation": "Apply appropriate encryption and backup configuration."
+      "remediation": "Apply SSL/TLS encryption to DNS records."
+    },
+    {
+      "resource_type": "aws_security_group",
+      "resource_name": "main_sg",
+      "compliance_concern": "Outbound traffic to the internet is not restricted.",
+      "standards": [
+        "NIST"
+      ],
+      "severity": "Low",
+      "remediation": "Restrict outbound traffic to specific trusted IP ranges or CIDR blocks."
+    },
+    {
+      "resource_type": "aws_s3_bucket",
+      "resource_name": "module.s3.aws_s3_bucket",
+      "compliance_concern": "Bucket access is not logged and monitored.",
+      "standards": [
+        "SOC 2",
+        "PCI-DSS"
+      ],
+      "severity": "Medium",
+      "remediation": "Configure CloudTrail to log and monitor bucket activity."
     }
   ],
   "recommendations": [
-    "Implement AWS Config for centralized policy management.",
-    "Regularly audit and refine IAM policies to minimize the use of wildcards.",
-    "Enable and configure proper encryption and backup settings on all resources.",
-    "Conduct periodic reviews of network security group rules."
+    "Limit the number of IAM roles with broad permissions.",
+    "Apply least privilege principle to all AWS resources.",
+    "Enable MFA on root accounts and critical IAM users.",
+    "Regularly review access key rotations and revoke unused keys."
   ]
 }

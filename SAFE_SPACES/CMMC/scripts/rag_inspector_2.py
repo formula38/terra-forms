@@ -37,12 +37,16 @@ class SeverityLevel(str, Enum):
 
 # --- Pydantic Model for Output Validation ---
 class ComplianceViolation(BaseModel):
-    resource_type: str = Field(..., description="Terraform AWS resource type, e.g., aws_s3_bucket")
-    resource_name: str = Field(..., description="Resource name as defined in the Terraform configuration")
-    compliance_concern: str = Field(..., description="Description of the specific compliance violation or risk")
-    standard: ComplianceStandard = Field(..., description="Applicable compliance framework")
-    severity: SeverityLevel = Field(..., description="Severity of the violation")
-    remediation: str = Field(..., description="Suggested short fix or mitigation for the violation")
+    resource_type: str = Field(..., description="Terraform AWS resource type")
+    resource_name: str = Field(..., description="Resource name as defined in TF")
+    compliance_concern: str = Field(..., description="What compliance issue it violates")
+    standards: List[Literal[
+        "HIPAA", "PCI-DSS", "FedRAMP", "CMMC", "GDPR",
+        "GLBA", "ISO 27001", "NIST", "SOC 2", "SOX", "CIS AWS"
+    ]] = Field(..., description="Applicable compliance frameworks")
+    severity: str = Field(..., description="Low / Medium / High")
+    remediation: str = Field(..., description="Suggested fix for the violation")
+
 
 # --- Argument Parsing ---
 parser = argparse.ArgumentParser(description="RAG compliance analyzer for Terraform plans")
@@ -87,7 +91,7 @@ You must return a single JSON object with **exactly two keys**:
     - resource_type
     - resource_name
     - compliance_concern
-    - standard (must be one of: HIPAA, PCI-DSS, FedRAMP)
+    - standards: a list of one or more from [HIPAA, PCI-DSS, FedRAMP, CMMC, GDPR, GLBA, ISO_27001, NIST, SOC 2, SOX, CIS AWS]
     - severity (Low, Medium, or High)
     - remediation (a short fix recommendation)
 - "recommendations": a list of 3–5 short, high-level actions to improve overall compliance posture.
@@ -95,6 +99,7 @@ You must return a single JSON object with **exactly two keys**:
 ❗ Strict formatting rules:
 - Output must be **a single JSON object** — no markdown, no prose, no code fences.
 - Do not include any extra commentary or explanation.
+- If a violation applies to multiple standards, include all applicable ones in the `standards` list.
 
 🔍 Cross-resource validation rules:
 - If an encryption config exists for a bucket, omit any “Unencrypted Storage” violation for it.

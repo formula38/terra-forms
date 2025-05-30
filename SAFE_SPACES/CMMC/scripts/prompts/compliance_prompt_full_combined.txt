@@ -1,0 +1,36 @@
+
+# Unified Compliance Prompt for Hybrid Terraform Compliance RAG
+
+This file combines full requirements across hybrid cloud infrastructures using Terraform, for standards including HIPAA, PCI-DSS, FedRAMP, CMMC, GDPR, GLBA, ISO 27001, NIST 800-53, SOC 2, SOX, and CIS AWS Foundations.
+
+✅ Refer to sections for:
+- Encryption controls (KMS, TLS, ACM)
+- IAM roles, RBAC, and MFA
+- Network ACLs, SGs, subnet isolation
+- Logging: CloudTrail, Config, GuardDuty, SIEMs
+- Data Residency: GovCloud, EU zones, financial isolation
+- Incident Response, IR automation, and tagging
+- Terraform implementation examples for each
+
+📌 Output Format (RAG Response):
+```json
+{
+  "violations": [
+    {
+      "resource_type": "aws_s3_bucket",
+      "resource_name": "data_archive",
+      "compliance_concern": "Unencrypted Storage",
+      "standard": "CMMC",
+      "severity": "High",
+      "remediation": "Enable server-side encryption with a KMS CMK"
+    }
+  ],
+  "recommendations": [
+    "Use Terraform to apply block public access on all S3 buckets",
+    "Rotate IAM credentials every 90 days",
+    "Enable AWS Config and CloudTrail in all regions"
+  ]
+}
+```
+
+❗ DO NOT include markdown, comments, or prose — only raw JSON like above in your output.

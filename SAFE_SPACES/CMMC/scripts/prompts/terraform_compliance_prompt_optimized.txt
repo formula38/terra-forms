@@ -1,0 +1,162 @@
+This master prompt defines how to evaluate Terraform hybrid cloud deployments for compliance with the following standards:
+
+* **HIPAA**
+* **PCI-DSS**
+* **FedRAMP**
+* **CMMC**
+* **GDPR**
+* **GLBA**
+* **ISO 27001**
+* **NIST 800-53**
+* **SOC 2**
+* **SOX**
+* **CIS AWS Foundations**
+
+---
+
+### 📐 Structure for Each Compliance Framework
+
+Include the following categories per standard:
+
+* **Encryption Standards** (at rest, in transit, backups)
+* **IAM Practices** (MFA, role scoping, key rotation, SoD)
+* **Logging & Monitoring** (CloudTrail, Config, SIEM, GuardDuty)
+* **Networking Rules** (SGs, NACLs, subnet isolation, DNS, egress restrictions)
+* **Data Residency & Sovereignty** (GovCloud, EU, financial zones)
+* **Incident Response Requirements** (if applicable)
+* **Infrastructure Hygiene** (patching, lifecycle automation, CVE scans)
+
+---
+
+### 🔎 Output Format
+
+Return a single **raw JSON object** with **two keys**:
+
+```json
+{
+  "violations": [
+    {
+      "resource_type": "aws_security_group",
+      "resource_name": "open_sg",
+      "compliance_concern": "Open ingress on 0.0.0.0/0",
+      "standard": "PCI-DSS",
+      "severity": "High",
+      "remediation": "Restrict ingress to known IPs and necessary ports only"
+    }
+  ],
+  "recommendations": [
+    "Rotate IAM user credentials every 90 days",
+    "Enable AWS Config and link with GuardDuty",
+    "Use Terraform modules with opinionated security defaults"
+  ]
+}
+```
+
+**⚠ DO NOT return markdown, fences, or prose. Raw JSON only.**
+
+---
+
+### 🔁 Cross-Resource Validation Logic
+
+Suppress a violation if:
+
+* `aws_s3_bucket` has a valid `aws_s3_bucket_server_side_encryption_configuration`
+* A public bucket has a `aws_s3_bucket_public_access_block` blocking access
+* A SG allows traffic, but a matching NACL denies the CIDR or port
+
+---
+
+### 🚨 Violation Categories to Flag
+
+| Concern             | Condition Example                            | Mapped Standards                 |
+| ------------------- | -------------------------------------------- | -------------------------------- |
+| Public S3           | No public block or restrictive bucket policy | HIPAA, PCI-DSS, GDPR, CIS AWS    |
+| Unencrypted Storage | No SSE or CMK on S3/RDS/EBS                  | HIPAA, CMMC, SOX, GLBA, ISO      |
+| Overly Broad IAM    | `*` wildcard in actions/resources            | HIPAA, SOC 2, ISO, NIST, GLBA    |
+| Logging Disabled    | CloudTrail/Flow Logs off                     | FedRAMP, SOC 2, PCI-DSS, CIS AWS |
+| Open Ingress        | 0.0.0.0/0 ingress for port 22 or 3389        | NIST, PCI-DSS, CIS AWS           |
+| Open Egress         | No egress restriction                        | CMMC, ISO, GDPR                  |
+| Missing MFA         | Admin access without MFA                     | HIPAA, PCI-DSS, ISO, SOC 2       |
+| Public Exposure     | ALB/NLB/EC2 with public IP and no WAF/auth   | FedRAMP, HIPAA, SOC 2, GDPR      |
+
+---
+
+### 🌐 Networking & Security Requirements (Per Framework Summary)
+
+#### HIPAA
+
+* Encrypt ePHI at rest (SSE-KMS, EBS, RDS)
+* TLS 1.2+ in transit
+* VPC Flow Logs and CloudTrail
+* Subnet isolation, encrypted NAT, US-only region enforcement
+
+#### PCI-DSS
+
+* Encrypted cardholder data (AES-256)
+* DMZ architecture (public, app, DB)
+* MFA for all admins
+* CloudTrail, Config, GuardDuty
+* No wildcard IAM; 12+ month log retention
+
+#### FedRAMP
+
+* FIPS 140-2 encryption
+* AWS GovCloud only
+* Security Hub + CloudWatch aggregation
+* No inline IAM
+* Strong boundary protection
+
+#### CMMC
+
+* AES-256 for CUI
+* Session timeouts, IAM trust boundaries
+* CI/CD isolated in subnet
+* SIEM log ingestion (OpenSearch/Splunk)
+
+#### GDPR
+
+* EU-based S3/RDS only
+* Prevent cross-region replication
+* Data access tagging, consent-based IAM
+* CloudTrail Insights for anomaly
+
+#### GLBA
+
+* No IGW in financial subnets
+* IAM scoped by tag, customer class
+* Access logs encrypted
+* Secure auth, strong separation of duties
+
+#### ISO 27001
+
+* KMS enforced via SCP
+* RBAC audit validation
+* Central time-sync (Chrony/NTP)
+* NACL deny-all, SG allow-only strategy
+
+#### NIST 800-53
+
+* AU-2, AU-6, AC-6, SC-7 mapped
+* KMS encryption for SC-12/SC-28
+* VPC boundaries with WAF + IDS
+
+#### SOC 2
+
+* MFA, IAM key rotation every 90 days
+* Secure VPC with jump box
+* Config Drift alerts, logging failure alerting
+
+#### SOX
+
+* SoD enforced via Terraform IAM modules
+* Immutable audit logs (7+ years)
+* Patching via lifecycle policies for finance stack
+
+#### CIS AWS Foundations
+
+* CloudTrail, Config, GuardDuty all enabled
+* Root login alarms
+* SG scoped by port + CIDR only
+* No public buckets
+
+---
