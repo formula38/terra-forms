@@ -1,0 +1,88 @@
+HIPAA Networking & Cybersecurity Requirements:
+- Ensure transmission security via TLS/SSL
+- Segment networks to isolate ePHI systems
+- Use firewalls to block unauthorized traffic
+- Enable intrusion detection and logging
+- Enforce access control via VPN or zero-trust models
+- Encrypt data at rest and in transit
+
+PCI-DSS Networking & Cybersecurity Requirements:
+- Install and maintain a firewall configuration to protect cardholder data
+- Do not use vendor-supplied defaults for system passwords
+- Protect stored cardholder data with encryption
+- Encrypt transmission of cardholder data across open networks
+- Use and regularly update anti-virus software
+- Track and monitor all access to network resources and cardholder data
+
+FedRAMP Networking & Cybersecurity Requirements:
+- Implement FIPS 140-2 validated encryption for data at rest and in transit
+- Use multifactor authentication for administrative access
+- Segment networks into security zones
+- Enforce secure boundary protections with firewalls and proxies
+- Continuously monitor systems for security events
+- Conduct regular vulnerability scanning and remediation
+
+CMMC Networking & Cybersecurity Requirements:
+- Use DNS filtering and firewalls to block malicious traffic
+- Isolate critical assets in segmented VLANs
+- Enforce least privilege on all network access points
+- Use encryption for data in motion and at rest
+- Implement audit logging and monitoring across all network layers
+- Use multi-factor authentication and centralized identity access
+
+GDPR Networking & Cybersecurity Requirements:
+- Protect personal data in transit via TLS/SSL
+- Restrict network access to authorized users only
+- Conduct regular penetration testing
+- Maintain logs of data processing activities
+- Use firewalls and IDS/IPS to detect intrusions
+- Ensure cross-border data transfer security mechanisms
+
+GLBA Networking & Cybersecurity Requirements:
+- Protect customer data with encrypted transmissions
+- Use network segmentation to isolate sensitive systems
+- Implement firewall and intrusion detection solutions
+- Restrict access to customer data via secure authentication
+- Monitor and log access to sensitive systems
+- Conduct regular risk assessments of network security
+
+ISO 27001 Networking & Cybersecurity Requirements:
+- Define and implement a network access control policy
+- Protect sensitive data using secure protocols like HTTPS and VPN
+- Implement segmentation and segregation of networks
+- Deploy intrusion detection/prevention systems (IDS/IPS)
+- Ensure physical and logical security for network components
+- Log and monitor all network activity
+
+NIST Networking & Cybersecurity Requirements:
+- Use boundary protection mechanisms such as firewalls and routers
+- Implement subnetting and VLANs for internal segmentation
+- Apply access control policies on all network devices
+- Use encryption for data transmission (TLS/IPSec)
+- Monitor for anomalous traffic patterns
+- Ensure audit logging of network communications
+
+SOC 2 Networking & Cybersecurity Requirements:
+- Enforce secure network configurations and patching policies
+- Use network segmentation to limit access to sensitive resources
+- Implement encryption of data in transit
+- Conduct vulnerability scanning and threat detection
+- Implement logging and monitoring for security events
+- Ensure secure remote access controls with MFA
+
+SOX Networking & Cybersecurity Requirements:
+- Restrict internal network access to financial systems
+- Use firewalls and secure VPNs for external access
+- Ensure audit logging of all access to financial records
+- Monitor for unauthorized network changes
+- Conduct periodic security reviews of network infrastructure
+- Implement intrusion detection and response systems
+
+CIS AWS Networking & Cybersecurity Requirements:
+- Disable public access for S3 buckets
+- Use VPC flow logs to monitor network activity
+- Restrict SSH access to known IPs only
+- Enable GuardDuty and CloudTrail for threat detection
+- Use Security Groups and NACLs with least privilege rules
+- Monitor and remediate open ports and misconfigurations
+
