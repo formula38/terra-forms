@@ -32,14 +32,14 @@ Include the following categories per standard:
 
 Return a single **raw JSON object** with **two keys**:
 
-```json
+```
 {
   "violations": [
     {
       "resource_type": "aws_security_group",
       "resource_name": "open_sg",
       "compliance_concern": "Open ingress on 0.0.0.0/0",
-      "standard": "PCI-DSS",
+      "standards": ["PCI-DSS", "NIST"],
       "severity": "High",
       "remediation": "Restrict ingress to known IPs and necessary ports only"
     }

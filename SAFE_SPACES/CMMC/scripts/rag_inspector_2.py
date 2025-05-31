@@ -24,7 +24,7 @@ class ComplianceStandard(str, Enum):
     CMMC = "CMMC"
     GDPR = "GDPR"
     GLBA = "GLBA"
-    ISO_27001 = "ISO_27001"
+    ISO_27001 = "ISO 27001"
     NIST = "NIST"
     SOC_2 = "SOC 2"
     SOX = "SOX"
@@ -78,7 +78,7 @@ llm = OllamaLLM(model="mistral")
 
 # --- Load & Enhance Prompt Template ---
 script_dir = Path(__file__).parent.resolve()
-prompt_path = script_dir / "prompts" / "compliance_prompt_detailed_all.txt"
+prompt_path = script_dir / "prompts" / "terraform_compliance_prompt_optimized.txt"
 if not prompt_path.exists():
     raise FileNotFoundError(f"Prompt template not found at {prompt_path}")
 
@@ -91,7 +91,7 @@ You must return a single JSON object with **exactly two keys**:
     - resource_type
     - resource_name
     - compliance_concern
-    - standards: a list of one or more from [HIPAA, PCI-DSS, FedRAMP, CMMC, GDPR, GLBA, ISO_27001, NIST, SOC 2, SOX, CIS AWS]
+    - standards: a list of one or more from [HIPAA, PCI-DSS, FedRAMP, CMMC, GDPR, GLBA, ISO 27001, NIST, SOC 2, SOX, CIS AWS]
     - severity (Low, Medium, or High)
     - remediation (a short fix recommendation)
 - "recommendations": a list of 3–5 short, high-level actions to improve overall compliance posture.
@@ -151,6 +151,9 @@ try:
 
     violations: List[ComplianceViolation] = []
     for item in violations_raw:
+        if not item.get("resource_name"):
+            print("⚠️ Skipping violation with missing resource_name:", item)
+            continue
         violations.append(ComplianceViolation(**item))
 
     report = {
