@@ -9,11 +9,8 @@ PLAN_FILE="${ROOT_DIR}/cmmc_compliant_tfplan"
 PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
 HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
 ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
-PROMPTS_DIR="${SCRIPT_DIR}/prompts"
-REFERENCE_DIR="/mnt/f/Cybersecurity Engineering/coldchainsecure/grc" 
 FINDINGS_DIR="${SCRIPT_DIR}/findings"
-OUTPUT_FILE="${FINDINGS_DIR}/compliance_violations.json"
-RAG_SCRIPT="${SCRIPT_DIR}/rag_inspector_2_final_cleaned.py"
+RAG_SCRIPT="${SCRIPT_DIR}/rag_inspector_2_final.py"
 
 # --- ARGS ---
 MODE="full"
@@ -98,18 +95,15 @@ check_ollama() {
 }
 
 run_rag_inspector() {
-  echo "🧠 Running multi-file RAG Inspector..."
+  echo "🧠 Running air-gapped RAG Inspector..."
   check_ollama
   mkdir -p "${FINDINGS_DIR}"
-
-  if [[ -d "${REFERENCE_DIR}" ]]; then
-    echo "📂 Including static reference docs from: ${REFERENCE_DIR}"
-    python3 "${RAG_SCRIPT}" "${PLAN_JSON}" "${OUTPUT_FILE}" --refdir "${REFERENCE_DIR}"
-  else
-    echo "⚠️ Reference directory not found at ${REFERENCE_DIR}. Running without it..."
-    python3 "${RAG_SCRIPT}" "${PLAN_JSON}" "${OUTPUT_FILE}"
-  fi
+  python3 "${RAG_SCRIPT}" "${PLAN_JSON}" "${FINDINGS_DIR}/compliance_violations.json"
 }
+
+if [[ -f "${FINDINGS_DIR}/compliance_violations.raw.txt" ]]; then
+  echo "🕵️ Raw LLM response saved to compliance_violations.raw.txt for inspection."
+fi
 
 # --- FLOW CONTROL ---
 case $MODE in
@@ -122,13 +116,15 @@ case $MODE in
   full)
     run_terraform_plan
     run_rag_inspector
+    chmod +x "${SCRIPT_DIR}/run_multirag.sh"
+    "${SCRIPT_DIR}/run_multirag.sh"
     generate_html
     ;;
 esac
 
-if [[ -f "${FINDINGS_DIR}/compliance_violations.raw.txt" ]]; then
-  echo "🕵️ Raw LLM response saved to compliance_violations.raw.txt for inspection."
-fi
-
 echo "✅ Finished! Output HTML: ${HTML_OUTPUT}"
+
+# --- MULTI-RAG EXECUTION ---
+chmod +x "${SCRIPT_DIR}/run_multirag.sh"
+"${SCRIPT_DIR}/run_multirag.sh"
 

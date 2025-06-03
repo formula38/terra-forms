@@ -1,6 +1,8 @@
 langchain
 langchain-community
+pymupdf
 pydantic
+tiktoken
 faiss-cpu
 transformers
 sentence-transformers

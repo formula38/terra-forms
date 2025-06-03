@@ -12,7 +12,7 @@ from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import OllamaLLM
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter, TokenTextSplitter
 from langchain.schema import Document
 from pydantic import BaseModel, Field, ValidationError
 
@@ -63,8 +63,18 @@ with open(args.plan_json, "r") as f:
 raw_text = json.dumps(data, indent=2)
 
 # --- Chunk into Documents ---
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+
+# text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+# chunks = text_splitter.split_text(raw_text)
+
+text_splitter = TokenTextSplitter(
+    chunk_size=512,     # fits well under Mistral’s 1024-token limit
+    chunk_overlap=50,
+    #model_name="",   # or use mistral-compatible tokenizer if supported
+    encoding_name="gpt2",  # ensures consistent tokenization
+)
 chunks = text_splitter.split_text(raw_text)
+
 docs = [Document(page_content=chunk) for chunk in chunks]
 
 # --- Embeddings + Vector Store ---
@@ -74,7 +84,25 @@ db = FAISS.from_documents(docs, embedding)
 retriever = db.as_retriever()
 
 # --- LLM Setup ---
-llm = OllamaLLM(model="mistral")
+llm = OllamaLLM(
+    model="mistral",
+    # model="deepseek-r1",  # Use a model that supports structured output
+    temperature=0,              # Low creativity, high determinism
+    top_p=0.3,                    # Reduces randomness; encourages consistent structure
+    top_k=20,                     # Lowers vocabulary scope — tightens focus
+    num_ctx=4096,                 # Longer context = more Terraform plan handled
+    repeat_penalty=1.2,          # Penalize repetition of violation patterns
+    stop=["\n\n"],               # Stop at natural JSON segment breaks
+    num_predict=1024,             # Expand response room for longer JSON lists
+    seed=1,                     # Deterministic generation for reproducibility
+    format="json",                # Forces structured output
+    tfs_z=1.5,                  # TFS for controlled output length
+    mirostat=2,                # Mirostat for adaptive control of output length
+    mirostat_eta=0.1,          # Mirostat parameters for adaptive control
+    mirostat_tau=5,            # Mirostat parameters for adaptive control
+    max_threads=4,            # Parallel processing for faster response
+    keep_alive=True,          # Keep connection alive for multiple queries
+)
 
 # --- Load & Enhance Prompt Template ---
 script_dir = Path(__file__).parent.resolve()
@@ -106,6 +134,9 @@ You must return a single JSON object with **exactly two keys**:
 - If a public-access-block resource exists for a bucket, omit any “Public S3” finding.
 - If a network ACL blocks traffic allowed by a security group, omit the SG-level finding.
 
+Respond ONLY with valid JSON object. Do not include any explanation, markdown, commentary, or surrounding text. 
+The output MUST begin with { and end with }. No <think> tags.
+
 🚫 Do not output a raw array. Only return a well-formed JSON object with the two required keys.
 """
 
@@ -115,8 +146,16 @@ prompt_template += template_suffix
 chain = RetrievalQA.from_chain_type(
     llm=llm,
     retriever=retriever,
-    chain_type="stuff",
-    return_source_documents=False
+    chain_type="stuff",  # Use map-reduce for better aggregation
+    return_source_documents=False,
+    # chain_type_kwargs={
+    #     "prompt": prompt_template,
+    #     "verbose": True,  # Enable verbose logging for debugging
+    # }
+    # kwargs={
+    #     "prompt": prompt_template,
+    #     "verbose": True,  # Enable verbose logging for debugging
+    # }
 )
 
 print("🔎 Inspecting Terraform plan with compliance-aware RAG...")

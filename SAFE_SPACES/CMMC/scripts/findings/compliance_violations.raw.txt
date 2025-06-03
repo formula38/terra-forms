@@ -1,33 +1,25 @@
- {
-     "violations": [
-       {
-         "resource_type": "aws_s3_bucket",
-         "resource_name": "logs_bucket",
-         "compliance_concern": "Bucket is publicly accessible",
-         "standards": ["HIPAA", "PCI-DSS", "GDPR", "CIS AWS"],
-         "severity": "High",
-         "remediation": "Apply a public access block to restrict access"
-       },
-       {
-         "resource_type": "aws_s3_bucket",
-         "resource_name": "data_bucket",
-         "compliance_concern": "Bucket is encrypted with server-side encryption",
-         "standards": ["HIPAA", "CMMC", "SOX", "GLBA"],
-         "severity": "Medium",
-         "remediation": "Apply AWS Key Management Service (KMS) encryption for data protection"
-       },
-       {
-         "resource_type": "aws_security_group",
-         "resource_name": "open_sg",
-         "compliance_concern": "Open ingress on 0.0.0.0/0",
-         "standards": ["PCI-DSS", "NIST"],
-         "severity": "High",
-         "remediation": "Restrict ingress to known IPs and necessary ports only"
-       }
-     ],
-     "recommendations": [
-       "Apply appropriate IAM roles, policies, and MFA for user access management",
-       "Enable AWS Config and CloudTrail across all accounts",
-       "Implement a centralized logging solution like Amazon CloudWatch or ELK stack"
-     ]
-   }
+{
+      "violations": [
+        {
+          "resource_type": "aws_s3_bucket",
+          "resource_name": "<BUCKET_NAME>",
+          "compliance_concern": "Data Protection (HIPAA, GDPR)",
+          "standards": ["HIPAA", "GDPR"],
+          "severity": "High",
+          "remediation": "Ensure bucket is not publicly accessible and apply encryption at rest"
+        },
+        {
+          "resource_type": "aws_security_group",
+          "resource_name": "<SECURITY_GROUP_NAME>",
+          "compliance_concern": "Network Segmentation (CIS AWS Foundations)",
+          "standards": ["CIS AWS"],
+          "severity": "Medium",
+          "remediation": "Limit inbound rules to necessary ports and CIDRs"
+        }
+      ],
+      "recommendations": [
+        "Enforce MFA for all IAM users across the environment.",
+        "Implement a centralized logging solution like AWS CloudWatch or ELK Stack.",
+        "Regularly review and update your infrastructure's security group rules."
+      ]
+    }
