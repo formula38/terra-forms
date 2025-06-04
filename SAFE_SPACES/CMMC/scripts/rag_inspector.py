@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""RAG Inspector: Analyze Terraform plan files for compliance violations via local LLM + vector search."""
+"""RAG Inspector Script: Analyze Terraform Plan JSON using LangChain + Pydantic"""
 
 import os
 import re
@@ -9,15 +9,20 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Literal
 
-import fitz  # PyMuPDF
-from pydantic import BaseModel, Field, ValidationError
-from langchain.schema import Document
-from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaLLM
+from langchain.text_splitter import TokenTextSplitter
+from langchain.schema import Document
+from pydantic import BaseModel, Field, ValidationError
 
-# --- Enum Definitions ---
+try:
+    import fitz  # PyMuPDF for PDF parsing
+except ImportError:
+    fitz = None
+
+# --- Enums ---
 class ComplianceStandard(str, Enum):
     HIPAA = "HIPAA"
     PCI_DSS = "PCI-DSS"
@@ -29,66 +34,112 @@ class ComplianceStandard(str, Enum):
     NIST = "NIST"
     SOC_2 = "SOC 2"
     SOX = "SOX"
+    CIS = "CIS"
     CIS_AWS = "CIS AWS"
+    CIS_AZURE = "CIS Azure"
+    CIS_GCP = "CIS GCP"
+
 
 class SeverityLevel(str, Enum):
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"
 
+# --- Output Schema ---
 class ComplianceViolation(BaseModel):
     resource_type: str
     resource_name: str
     compliance_concern: str
     standards: List[Literal[
         "HIPAA", "PCI-DSS", "FedRAMP", "CMMC", "GDPR",
-        "GLBA", "ISO 27001", "NIST", "SOC 2", "SOX", "CIS AWS"
+        "GLBA", "ISO 27001", "NIST", "SOC 2", "SOX",
+        "CIS", "CIS AWS", "CIS Azure", "CIS GCP"
     ]]
     severity: str
     remediation: str
 
-# --- CLI Args ---
-parser = argparse.ArgumentParser(description="Analyze Terraform plan against compliance frameworks")
-parser.add_argument("plan_json", help="Path to .json plan file or directory of .tf/.txt")
-parser.add_argument("output_path", help="Where to save structured compliance findings")
-parser.add_argument("--refdir", help="Optional reference directory for static docs", default=None)
+# --- CLI ---
+parser = argparse.ArgumentParser(description="RAG compliance analyzer for Terraform plans")
+parser.add_argument("plan_json", help="Path to Terraform plan JSON")
+parser.add_argument("output_path", help="Path to save compliance JSON")
+parser.add_argument("--refdir", help="Optional reference directory", default=None)
 args = parser.parse_args()
 
-plan_path = Path(args.plan_json)
+input_path = Path(args.plan_json)
 output_path = Path(args.output_path)
-docs: List[Document] = []
+docs = []
 
-# --- Load Prompts ---
+# --- Include Prompts Directory ---
 PROMPTS_DIR = Path(__file__).parent / "prompts"
+PROMPT = "blanket_compliance_prompt.txt"
+
 if PROMPTS_DIR.exists():
     print(f"📂 Including prompts from: {PROMPTS_DIR}")
     for file in PROMPTS_DIR.glob("*"):
-        if file.name == "terraform_compliance_prompt_optimized.txt":
+        if file.name == PROMPT:
             continue
-        if file.suffix in {".json", ".tf", ".txt"}:
-            try:
-                content = file.read_text(errors="ignore")
-                docs.append(Document(
-                    page_content=content,
-                    metadata={
-                        "source": file.name,
-                        "standard": file.parent.name.upper()
-                    }
-                ))
-            except Exception as e:
-                print(f"⚠️ Could not load prompt {file.name}: {e}")
+        try:
+            content = file.read_text()
+            docs.append(Document(
+                page_content=content,
+                metadata={"source": file.name, "standard": "PROMPTS"}
+            ))
+        except Exception as e:
+            print(f"⚠️ Error reading prompt file {file.name}: {e}")
 
-# --- Load Optional Reference Directory ---
+# --- Load Terraform Plan or State ---
+if input_path.is_file():
+    with open(input_path, "r") as f:
+        data = json.load(f)
+
+    # --- First try: resource_changes (from plan output) ---
+    changes = data.get("resource_changes", [])
+
+    # --- Fallback: full state resources (from terraform.tfstate) ---
+    if not changes:
+        root_module = data.get("values", {}).get("root_module", {})
+        resources = root_module.get("resources", [])
+        for res in resources:
+            resource_type = res.get("type", "unknown")
+            resource_name = res.get("name", "unknown")
+            docs.append(Document(
+                page_content=json.dumps(res, indent=2),
+                metadata={
+                    "resource_type": resource_type,
+                    "resource_name": resource_name,
+                    "standard": "TERRAFORM_STATE",
+                    "source": "terraform_state"
+                }
+            ))
+    else:
+        for change in changes:
+            resource_type = change.get("type", "unknown")
+            resource_name = change.get("address", "unknown")
+            docs.append(Document(
+                page_content=json.dumps(change, indent=2),
+                metadata={
+                    "resource_type": resource_type,
+                    "resource_name": resource_name,
+                    "standard": resource_type.upper(),
+                    "source": resource_name.upper()
+                }
+            ))
+
+
+# --- Reference Directory ---
 if args.refdir:
     ref_dir = Path(args.refdir)
     if ref_dir.exists():
         print(f"📂 Including static reference docs from: {ref_dir}")
         for file in ref_dir.rglob("*"):
-            if file.suffix.lower() in {".json", ".tf", ".txt", ".pdf"}:
+            if file.suffix.lower() in {".txt", ".json", ".md", ".pdf"} and file.is_file():
                 try:
-                    if file.suffix.lower() == ".pdf":
-                        with fitz.open(file) as doc:
-                            content = "\n".join(page.get_text() for page in doc)
+                    content = ""
+                    if file.suffix.lower() == ".json":
+                        content = json.dumps(json.load(open(file)), indent=2)
+                    elif file.suffix.lower() == ".pdf" and fitz:
+                        with fitz.open(file) as pdf:
+                            content = "\n".join(page.get_text() for page in pdf)
                     else:
                         content = file.read_text(errors="ignore")
 
@@ -100,51 +151,22 @@ if args.refdir:
                         }
                     ))
                 except Exception as e:
-                    print(f"⚠️ Error reading static ref file {file.name}: {e}")
-    else:
-        print(f"❌ Reference directory not found at {ref_dir}")
+                    print(f"⚠️ Error reading {file.name}: {e}")
 
-# --- Parse Terraform Plan or Dir of Files ---
-if plan_path.is_file():
-    with open(plan_path) as f:
-        plan_data = json.load(f)
-    for change in plan_data.get("resource_changes", []):
-        docs.append(Document(
-            page_content=json.dumps(change, indent=2),
-            metadata={
-                "resource_type": change.get("type", "unknown"),
-                "resource_name": change.get("name") or change.get("address") or "unknown"
-            }
-        ))
-elif plan_path.is_dir():
-    for file in plan_path.rglob("*"):
-        if file.name == "terraform_compliance_prompt_optimized.txt":
-            continue
-        if file.suffix.lower() in {".json", ".tf", ".txt"}:
-            try:
-                content = file.read_text(errors="ignore")
-                docs.append(Document(
-                    page_content=content,
-                    metadata={
-                        "source": file.name,
-                        "standard": file.parent.name.upper()
-                    }
-                ))
-            except Exception as e:
-                print(f"⚠️ Could not read {file.name}: {e}")
-
-# --- Log what's loaded ---
+# ✅ Log what was ingested
 print(f"📄 Loaded {len(docs)} documents.")
 for doc in docs:
     meta = doc.metadata or {}
-    print(f"— {Path(meta.get('source', 'Unknown')).name} [{meta.get('standard', 'Unlabeled')}]")
+    file_name = Path(meta.get("source", "Unknown")).name
+    label = meta.get("standard", "Unlabeled")
+    print(f"— {file_name} [{label}]")
 
-# --- Embeddings + Retrieval ---
-embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# --- Embedding + Vector DB ---
+embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 db = FAISS.from_documents(docs, embedding)
 retriever = db.as_retriever()
 
-# --- LLM Configuration ---
+# --- LLM Setup ---
 llm = OllamaLLM(
     model="mistral",
     temperature=0,
@@ -160,66 +182,72 @@ llm = OllamaLLM(
     mirostat=2,
     mirostat_eta=0.1,
     mirostat_tau=5,
-    keep_alive=True,
 )
 
 # --- Load Prompt Template ---
-prompt_file = PROMPTS_DIR / "blanket_compliance_prompt.txt"
-if not prompt_file.exists():
-    raise FileNotFoundError(f"Missing required prompt at: {prompt_file}")
-base_prompt = prompt_file.read_text().strip() + """
+prompt_path = PROMPTS_DIR / PROMPT
+if not prompt_path.exists():
+    raise FileNotFoundError(f"Prompt template not found at {prompt_path}")
+prompt_template = prompt_path.read_text().strip() + """
 You must return a single JSON object with exactly two keys:
 - "violations": a list of objects, each with:
     - resource_type
-    - resource_name (must be real from the Terraform plan, no placeholders)
+    - resource_name (match the 'name' field in the plan JSON)
     - compliance_concern
-    - standards (list of compliance labels)
+    - standards (list of standards impacted)
     - severity (Low, Medium, or High)
     - remediation
 
-- "recommendations": a list of 3–5 high-level actions (short text only).
+- "recommendations": a list of 3–5 high-level actions.
 
-⚠️ DO NOT fabricate resource names like <BUCKET_NAME>. Use real values found in the Terraform JSON.
 ⚠️ DO NOT return markdown, prose, or comments. Only valid raw JSON should be returned.
+⚠️ When referencing CIS standards, specify the provider-specific variant (e.g., "CIS AWS", "CIS Azure", or "CIS GCP") if the control applies to a particular cloud platform.
 """
 
-# --- Query Chain ---
+# --- Execute Chain ---
 print("🔎 Inspecting Terraform plan with compliance-aware RAG...")
-qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
-response = qa_chain.invoke({"query": base_prompt})
+chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
+response = chain.invoke({"query": prompt_template})
 
-# --- Extract only the first valid JSON object ---
+# --- Parse LLM Output ---
 raw = response.get("result", "") if isinstance(response, dict) else str(response)
+raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
+raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
 
-# Attempt to isolate the first JSON block only
-json_start = raw.find('{')
-if json_start == -1:
-    raise ValueError("❌ No JSON object found in model output.")
-
-raw_trimmed = raw[json_start:]
-json_end = raw_trimmed.rfind('}') + 1
-raw_trimmed = raw_trimmed[:json_end]
-
-# Strip code fences and comments if any slipped through
-raw_clean = re.sub(r"^```(?:json)?\s*", "", raw_trimmed, flags=re.MULTILINE)
-raw_clean = re.sub(r"\s*```$", "", raw_clean, flags=re.MULTILINE)
-
+output_path.parent.mkdir(parents=True, exist_ok=True)
 raw_path = output_path.with_suffix(".raw.txt")
-with open(raw_path, "w") as f:
-    f.write(raw_clean)
+
+if not input_path.exists() or input_path.stat().st_size == 0:
+    raise ValueError(f"Input file {input_path} is missing or empty.")
+
+with open(input_path, "r") as f:
+    try:
+        data = json.load(f)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in input file {input_path}: {e}")
+
+
 
 try:
     parsed = json.loads(raw)
-    violations = [ComplianceViolation(**v) for v in parsed.get("violations", []) if v.get("resource_name")]
+    if not isinstance(parsed, dict):
+        raise ValueError("Expected JSON object")
+    violations_raw = parsed.get("violations", [])
+    recommendations = parsed.get("recommendations", [])
+    violations = [
+        ComplianceViolation(**v)
+        for v in violations_raw
+        if v.get("resource_name")
+    ]
     report = {
         "violations": [v.model_dump() for v in violations],
-        "recommendations": parsed.get("recommendations", [])
+        "recommendations": recommendations
     }
     with open(output_path, "w") as f:
         json.dump(report, f, indent=2)
     print(f"✅ Compliance check complete. Results saved to: {output_path}")
-except Exception as e:
-    print(f"❌ Failed to parse or validate JSON: {e}")
+except (json.JSONDecodeError, ValidationError, ValueError) as e:
+    print("❌ Failed to parse or validate JSON:", e)
     with open(output_path, "w") as f:
         f.write(raw)
     print(f"⚠️ Raw output saved to: {output_path}")

@@ -2,29 +2,29 @@
   "violations": [
     {
       "resource_type": "aws_s3_bucket",
-      "resource_name": "<BUCKET_NAME>",
-      "compliance_concern": "Data Protection (HIPAA, GDPR)",
+      "resource_name": "<S3 Bucket Name>",
+      "compliance_concern": "Data Protection",
       "standards": [
         "HIPAA",
         "GDPR"
       ],
       "severity": "High",
-      "remediation": "Ensure bucket is not publicly accessible and apply encryption at rest"
+      "remediation": "Enable server-side encryption (SSE) and ensure data is encrypted at rest."
     },
     {
-      "resource_type": "aws_security_group",
-      "resource_name": "<SECURITY_GROUP_NAME>",
-      "compliance_concern": "Network Segmentation (CIS AWS Foundations)",
+      "resource_type": "aws_iam_role",
+      "resource_name": "<IAM Role Name>",
+      "compliance_concern": "Identity & Access Management",
       "standards": [
         "CIS AWS"
       ],
       "severity": "Medium",
-      "remediation": "Limit inbound rules to necessary ports and CIDRs"
+      "remediation": "Ensure least privilege is applied to the IAM role."
     }
   ],
   "recommendations": [
-    "Enforce MFA for all IAM users across the environment.",
-    "Implement a centralized logging solution like AWS CloudWatch or ELK Stack.",
+    "Implement a centralized logging solution for all resources.",
+    "Enable multi-factor authentication (MFA) on all accounts and roles.",
     "Regularly review and update your infrastructure's security group rules."
   ]
 }

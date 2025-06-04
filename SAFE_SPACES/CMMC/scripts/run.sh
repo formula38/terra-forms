@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="${SCRIPT_DIR}/.."
 PLAN_FILE="${ROOT_DIR}/cmmc_compliant_tfplan"
 PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
+STATE_JSON="${ROOT_DIR}/terraform.tfstate.json"
 HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
 ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
 PROMPTS_DIR="${SCRIPT_DIR}/prompts"
@@ -39,7 +40,6 @@ if [ ! -d "${ESTIMATOR_DIR}/venv" ]; then
   echo "🛠️ Creating virtual environment..."
   python3 -m venv "${ESTIMATOR_DIR}/venv"
 fi
-
 source "${ESTIMATOR_DIR}/venv/bin/activate"
 echo "📦 Virtual environment activated."
 
@@ -58,25 +58,28 @@ fi
 if [ "$OFFLINE_MODE" = false ]; then
   pip install --upgrade pip --break-system-packages
   pip install -r "${ESTIMATOR_DIR}/requirements.txt" --break-system-packages
-
-  RAG_REQUIREMENTS="${SCRIPT_DIR}/requirements-rag.txt"
-  if [ -f "$RAG_REQUIREMENTS" ]; then
-    pip install -r "$RAG_REQUIREMENTS" --break-system-packages
-  else
-    echo "langchain langchain-community langchain-ollama langchain-huggingface pymupdf" > "$RAG_REQUIREMENTS"
-    pip install -r "$RAG_REQUIREMENTS" --break-system-packages
-  fi
+  RAG_REQ="${SCRIPT_DIR}/requirements-rag.txt"
+  echo "langchain langchain-community langchain-ollama langchain-huggingface pymupdf" > "$RAG_REQ"
+  pip install -r "$RAG_REQ" --break-system-packages
 else
   echo "🚫 Offline mode enabled — skipping pip installs"
 fi
 
-# --- Functions ---
+# --- FUNCTIONS ---
 run_terraform_plan() {
   echo "📐 Running terraform init and plan..."
   cd "${ROOT_DIR}"
   terraform init -input=false > /dev/null
   terraform plan -out "${PLAN_FILE}"
   terraform show -json "${PLAN_FILE}" > "${PLAN_JSON}"
+  if [ -f terraform.tfstate ]; then
+    echo "📄 Found terraform.tfstate — exporting JSON"
+    terraform show -json terraform.tfstate > "${STATE_JSON}"
+  else
+    echo "⚠️ No tfstate available — skipping tfstate export"
+    rm -f "${STATE_JSON}"  # Avoid empty file confusion
+  fi
+
 }
 
 generate_html() {
@@ -88,22 +91,19 @@ generate_html() {
 check_ollama() {
   echo "🔍 Checking Ollama availability..."
   if ! command -v ollama &> /dev/null; then
-    echo "❌ Ollama is not installed."
+    echo "❌ Ollama not found."
     if [ "$OFFLINE_MODE" = false ]; then
-      echo "📡 Installing Ollama from remote..."
       curl -fsSL https://ollama.com/install.sh | sh
     else
-      echo "❗ Offline mode: Cannot install Ollama. Exiting."
+      echo "❗ Cannot install Ollama in offline mode."
       exit 1
     fi
   fi
-
   if ! ollama list | grep -q "mistral"; then
     if [ "$OFFLINE_MODE" = false ]; then
-      echo "⬇️ Pulling 'mistral' model..."
       ollama pull mistral
     else
-      echo "❗ Offline mode: 'mistral' model not found and cannot pull. Exiting."
+      echo "❗ Cannot pull mistral model in offline mode."
       exit 1
     fi
   else
@@ -115,17 +115,26 @@ run_rag_inspector() {
   echo "🧠 Running multi-file RAG Inspector..."
   check_ollama
   mkdir -p "${FINDINGS_DIR}"
+  PLAN_INPUT="${PLAN_JSON}"
 
+  if [ -f "${STATE_JSON}" ]; then
+    echo "📄 Using tfstate for compliance analysis"
+    PLAN_INPUT="${STATE_JSON}"
+  else
+    echo "📄 Falling back to tfplan.json for compliance analysis"
+  fi
+  [ -f "${STATE_JSON}" ] && PLAN_INPUT="${STATE_JSON}"
+  
   if [[ -d "${REFERENCE_DIR}" ]]; then
     echo "📂 Including static reference docs from: ${REFERENCE_DIR}"
-    python3 "${RAG_SCRIPT}" "${PLAN_JSON}" "${OUTPUT_FILE}" --refdir "${REFERENCE_DIR}"
+    python3 "${RAG_SCRIPT}" "${PLAN_INPUT}" "${OUTPUT_FILE}" --refdir "${REFERENCE_DIR}"
   else
     echo "⚠️ Reference directory not found at ${REFERENCE_DIR}. Running without it..."
-    python3 "${RAG_SCRIPT}" "${PLAN_JSON}" "${OUTPUT_FILE}"
+    python3 "${RAG_SCRIPT}" "${PLAN_INPUT}" "${OUTPUT_FILE}"
   fi
 }
 
-# --- MAIN FLOW ---
+# --- MAIN EXEC ---
 case $MODE in
   plan)
     run_terraform_plan
@@ -140,8 +149,6 @@ case $MODE in
     ;;
 esac
 
-if [[ -f "${FINDINGS_DIR}/compliance_violations.raw.txt" ]]; then
-  echo "🕵️ Raw LLM response saved to compliance_violations.raw.txt for inspection."
-fi
+[[ -f "${FINDINGS_DIR}/compliance_violations.raw.txt" ]] && echo "🕵️ Raw LLM response saved."
 
 echo "✅ Finished! Output HTML: ${HTML_OUTPUT}"
