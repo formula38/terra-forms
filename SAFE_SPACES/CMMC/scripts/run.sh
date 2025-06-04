@@ -3,12 +3,14 @@
 set -euo pipefail
 
 # --- CONFIG ---
+COMPLIANCE="cmmc"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="${SCRIPT_DIR}/.."
-PLAN_FILE="${ROOT_DIR}/cmmc_compliant_tfplan"
-PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
+PLAN_FILE="${ROOT_DIR}/${COMPLIANCE}_compliant_tfplan"
+PLAN_JSON="${ROOT_DIR}/${COMPLIANCE}_compliant_tfplan.json"
 STATE_JSON="${ROOT_DIR}/terraform.tfstate.json"
-HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
+HTML_OUTPUT="${ROOT_DIR}/${COMPLIANCE}_compliant_plan_summary.html"
 ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
 PROMPTS_DIR="${SCRIPT_DIR}/prompts"
 REFERENCE_DIR="/mnt/f/Cybersecurity Engineering/coldchainsecure/cold_rag"
