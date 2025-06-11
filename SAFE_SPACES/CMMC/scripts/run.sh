@@ -61,7 +61,6 @@ if [ "$OFFLINE_MODE" = false ]; then
   pip install --upgrade pip --break-system-packages
   pip install -r "${ESTIMATOR_DIR}/requirements.txt" --break-system-packages
   RAG_REQ="${SCRIPT_DIR}/requirements-rag.txt"
-  echo "langchain langchain-community langchain-ollama langchain-huggingface pymupdf" > "$RAG_REQ"
   pip install -r "$RAG_REQ" --break-system-packages
 else
   echo "🚫 Offline mode enabled — skipping pip installs"
@@ -113,6 +112,16 @@ check_ollama() {
   fi
 }
 
+train_finetuned_model() {
+  MODEL_DIR="${SCRIPT_DIR}/models/mpnet-finetuned"
+  if [ ! -d "$MODEL_DIR" ]; then
+    echo "🧠 Fine-tuned model not found. Bootstrapping..."
+    python3 "${SCRIPT_DIR}/models/train_model.py"
+  else
+    echo "✅ Found fine-tuned model: $MODEL_DIR"
+  fi
+}
+
 run_rag_inspector() {
   echo "🧠 Running multi-file RAG Inspector..."
   check_ollama
@@ -146,6 +155,7 @@ case $MODE in
     ;;
   full)
     run_terraform_plan
+    train_finetuned_model
     run_rag_inspector
     generate_html
     ;;

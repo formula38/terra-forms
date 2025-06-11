@@ -107,8 +107,8 @@ if input_path.is_file():
                 metadata={
                     "resource_type": resource_type,
                     "resource_name": resource_name,
-                    "standard": "TERRAFORM_STATE",
-                    "source": "terraform_state"
+                    "standard": resource_type.upper(),
+                    "source": resource_name.upper()
                 }
             ))
     else:
@@ -162,9 +162,13 @@ for doc in docs:
     print(f"— {file_name} [{label}]")
 
 # --- Embedding + Vector DB ---
-embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+embedding = HuggingFaceEmbeddings(model_name="./scripts/models/mpnet-finetuned")
+# embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 db = FAISS.from_documents(docs, embedding)
-retriever = db.as_retriever()
+retriever = db.as_retriever(
+    search_type="mmr",              # Enables MMR
+    search_kwargs={"k": 20}         # Fetch 10 diverse and relevant docs
+)
 
 # --- LLM Setup ---
 llm = OllamaLLM(
@@ -206,8 +210,22 @@ You must return a single JSON object with exactly two keys:
 
 # --- Execute Chain ---
 print("🔎 Inspecting Terraform plan with compliance-aware RAG...")
-chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
+chain = RetrievalQA.from_chain_type(
+    llm=llm, 
+    retriever=retriever, 
+    chain_type="stuff",
+    return_source_documents=True,
+    )
 response = chain.invoke({"query": prompt_template})
+# See which docs made it in
+print("📚 Source documents used by the LLM:\n")
+for i, doc in enumerate(response["source_documents"], 1):
+    meta = doc.metadata
+    print(f"🔹 [{i}] {meta.get('resource_name', 'Unnamed')} ({meta.get('resource_type', 'Unknown')})")
+    print(f"    └─ Source: {meta.get('source', 'N/A')}")
+    print(f"    └─ Standard: {meta.get('standard', 'Unlabeled')}")
+    print()  # extra line for readability
+
 
 # --- Parse LLM Output ---
 raw = response.get("result", "") if isinstance(response, dict) else str(response)
