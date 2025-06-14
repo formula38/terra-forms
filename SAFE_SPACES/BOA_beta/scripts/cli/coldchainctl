@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# --- CONFIG ---
+# Find project root based on where terraform-cost-estimator folder lives
+find_project_root() {
+  local dir="$(pwd)"
+  while [ "$dir" != "/" ]; do
+    if [ -d "$dir/scripts/terraform-cost-estimator" ]; then
+      echo "$dir"
+      return
+    fi
+    dir="$(dirname "$dir")"
+  done
+  echo "❌ Could not find project root!" >&2
+  exit 1
+}
+
+ROOT_DIR="$(find_project_root)"
+SCRIPT_DIR="${ROOT_DIR}/scripts"
+ESTIMATOR_DIR="${SCRIPT_DIR}/terraform-cost-estimator"
+PLAN_FILE="${ROOT_DIR}/cmmc_compliant_tfplan"
+PLAN_JSON="${ROOT_DIR}/cmmc_compliant_tfplan.json"
+HTML_OUTPUT="${ROOT_DIR}/cmmc_compliant_plan_summary.html"
+
+# --- VENV ---
+ensure_venv() {
+  if [ ! -d "${ESTIMATOR_DIR}/venv" ]; then
+    echo "🛠️ Creating new virtual environment..."
+    python3 -m venv "${ESTIMATOR_DIR}/venv"
+  fi
+  source "${ESTIMATOR_DIR}/venv/bin/activate"
+  pip install --upgrade pip > /dev/null
+  pip install -r "${ESTIMATOR_DIR}/requirements.txt" > /dev/null
+}
+
+# --- FUNCTIONS ---
+run_plan() {
+  ensure_venv
+  echo "📐 Running terraform init and plan..."
+  cd "${ROOT_DIR}"
+  terraform init -input=false > /dev/null
+  terraform plan -out "${PLAN_FILE}"
+  terraform show -json "${PLAN_FILE}" > "${PLAN_JSON}"
+  echo "✅ Plan and JSON saved!"
+}
+
+run_html() {
+  ensure_venv
+  THEME="${1:-dark}"
+  echo "🖥️  Generating HTML report (${THEME} mode)..."
+  cd "${SCRIPT_DIR}"
+  python3 terraform_json_to_html.py "${PLAN_JSON}" "${HTML_OUTPUT}" "${THEME}"
+  echo "✅ HTML written to: ${HTML_OUTPUT}"
+}
+
+show_help() {
+  echo "🧊 Coldchain Secure CLI 🧊"
+  echo
+  echo "Usage: coldchainctl [command] [options]"
+  echo
+  echo "Commands:"
+  echo "  plan              Run terraform init, plan, and save JSON"
+  echo "  html [dark|light] Generate HTML report (default dark)"
+  echo "  full [dark|light] Run full flow (plan + html)"
+  echo "  help              Show this help menu"
+  echo
+  echo "Examples:"
+  echo "  coldchainctl plan"
+  echo "  coldchainctl html dark"
+  echo "  coldchainctl full light"
+  echo
+}
+
+# --- MAIN ---
+COMMAND="${1:-help}"
+shift || true  # shift off command
+
+case "$COMMAND" in
+  plan)
+    run_plan
+    ;;
+  html)
+    run_html "${1:-dark}"
+    ;;
+  full)
+    run_plan
+    run_html "${1:-dark}"
+    ;;
+  help|*)
+    show_help
+    ;;
+esac
+

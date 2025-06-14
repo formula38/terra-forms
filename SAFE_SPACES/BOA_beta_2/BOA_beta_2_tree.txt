@@ -1,0 +1,53 @@
+.
+├── BOA_beta_2_tree.txt
+├── agents
+│   └── agent_registry.py
+├── cli
+│   └── main.py
+├── config
+│   ├── logging.yml
+│   └── settings.yml
+├── core
+│   ├── compliance_checker.py
+│   ├── embeddings.py
+│   ├── rag_engine.py
+│   └── utils.py
+├── docs
+│   └── README.md
+├── html_outputs
+│   └── index.html
+├── models
+│   └── bootstrap_pairs.py
+├── notebooks
+│   ├── ecploratory
+│   │   └── prototype_test.ipynb
+│   └── production
+│       └── embedding_pipeline.ipynb
+├── personas
+│   └── brewery_manager.json
+├── plugins
+│   └── custom_embedding.py
+├── policies
+│   └── hipaa_policy.md
+├── prompts
+│   ├── brewery
+│   │   └── prompt_instructions.txt
+│   ├── cafe
+│   │   └── prompt_instructions.txt
+│   └── shared
+│       └── compliance_baseline.txt
+├── scripts
+│   ├── model_cleanup.sh
+│   └── run_rag_inspector.py
+├── terraform-cost-estimator
+│   └── estimator.py
+├── tests
+│   ├── test_core.py
+│   └── test_prompts.py
+└── ui
+    ├── static
+    │   └── styles.css
+    └── templates
+        └── dashboard.html
+
+24 directories, 27 files
