@@ -1,2 +1,106 @@
+.terraform/# --------------------------
+# OS & Editor Specific
+# --------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+*.idea/
+.vscode/
+.env
+*.code-workspace
+
+# --------------------------
+# Python & Jupyter
+# --------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints
+*.egg-info/
+*.eggs/
+dist/
+build/
+
+# --------------------------
+# Terraform
+# --------------------------
 .terraform/
-.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+terraform.tfvars
+override.tf
+override.tf.json
+*.tfplan
+*.backup
+
+# --------------------------
+# Hugging Face / Models
+# --------------------------
+*.safetensors
+*.pt
+*.bin
+*.ckpt
+*.onnx
+*.tflite
+*.h5
+*.pb
+*.msgpack
+
+# Local model dirs
+#/models/
+#*/models/
+#SAFE_SPACES/**/models/
+
+# --------------------------
+# Virtual Environments
+# --------------------------
+venv/
+.env/
+env/
+ENV/
+.Python
+
+# --------------------------
+# Logs & Debug
+# --------------------------
+*.log
+logs/
+debug/
+*.out
+
+# --------------------------
+# Air-gapped Inspector Files
+# --------------------------
+findings/
+plan.json
+compliance_violations.json
+output_report.html
+*.sqlite3
+
+# --------------------------
+# Node (just in case)
+# --------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --------------------------
+# Backup & Archive
+# --------------------------
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.bak
+*.old
+*.orig
+
+*.safetensors
