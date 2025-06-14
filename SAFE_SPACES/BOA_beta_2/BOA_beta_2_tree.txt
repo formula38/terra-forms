@@ -1,53 +1,90 @@
 .
 ├── BOA_beta_2_tree.txt
-├── agents
-│   └── agent_registry.py
-├── cli
-│   └── main.py
+├── README.md
+├── client
+├── coldrag
+│   ├── docs
+│   ├── models
+│   ├── prompts
+│   │   └── blanket_compliance_prompt.txt
+│   └── scripts
+│       ├── rag_inspector.py
+│       ├── train_model.py
+│       └── training_pairs.py
 ├── config
-│   ├── logging.yml
-│   └── settings.yml
-├── core
-│   ├── compliance_checker.py
-│   ├── embeddings.py
-│   ├── rag_engine.py
-│   └── utils.py
-├── docs
-│   └── README.md
-├── html_outputs
-│   └── index.html
-├── models
-│   └── bootstrap_pairs.py
-├── notebooks
-│   ├── ecploratory
-│   │   └── prototype_test.ipynb
-│   └── production
-│       └── embedding_pipeline.ipynb
-├── personas
-│   └── brewery_manager.json
-├── plugins
-│   └── custom_embedding.py
-├── policies
-│   └── hipaa_policy.md
-├── prompts
-│   ├── brewery
-│   │   └── prompt_instructions.txt
-│   ├── cafe
-│   │   └── prompt_instructions.txt
-│   └── shared
-│       └── compliance_baseline.txt
-├── scripts
-│   ├── model_cleanup.sh
-│   └── run_rag_inspector.py
-├── terraform-cost-estimator
-│   └── estimator.py
-├── tests
-│   ├── test_core.py
-│   └── test_prompts.py
-└── ui
-    ├── static
-    │   └── styles.css
-    └── templates
-        └── dashboard.html
+│   ├── requirements-rag.txt
+│   └── requirements.txt
+├── infra
+│   ├── scripts
+│   │   ├── ec2_user_data.sh
+│   │   ├── estimator.py
+│   │   ├── pricing.py
+│   │   └── terraform_cost_estimator.py
+│   └── terrafrom
+│       ├── backend.tf
+│       ├── main.tf
+│       ├── modules
+│       │   ├── acm
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── cloudfront
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── cloudtrail
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── compute
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── config
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── kms
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── logging
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── networking
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── rds
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── route53
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   ├── s3
+│       │   │   ├── main.tf
+│       │   │   ├── outputs.tf
+│       │   │   └── variables.tf
+│       │   └── waf
+│       │       ├── main.tf
+│       │       ├── outputs.tf
+│       │       └── variables.tf
+│       ├── outputs.tf
+│       ├── providers.tf
+│       ├── terraform.tfvars
+│       └── variables.tf
+├── main
+│   └── run.sh
+├── output
+│   ├── html
+│   ├── json
+│   ├── scripts
+│   │   ├── generate_tf_plan_html.sh
+│   │   └── terraform_json_to_html.py
+│   └── terraform
+└── personas
 
-24 directories, 27 files
+31 directories, 57 files
