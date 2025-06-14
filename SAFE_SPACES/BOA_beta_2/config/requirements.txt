@@ -1,2 +1,18 @@
+# Price Estimator Dependencies
 boto3
 pytz
+
+# COLDRAG Dependencies
+langchain
+langchain-community
+pymupdf
+pydantic
+datasets
+tiktoken
+faiss-cpu
+transformers
+sentence-transformers
+langchain-ollama
+langchain-huggingface
+transformers[torch]
+accelerate>=0.26.0
