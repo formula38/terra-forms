@@ -1,37 +1,43 @@
 #!/bin/bash
+set -e
 
-# Load environment variables from .env
-set -o allexport
-source .env
-set +o allexport
-
-# Activate virtual environment if present
-if [ -d "venv" ]; then
-  source venv/bin/activate
+# Load environment variables
+if [ -f .env ]; then
+    echo "Loading environment variables from .env..."
+    export $(grep -v '^#' .env | xargs)
+else
+    echo ".env file not found. Exiting."
+    exit 1
 fi
 
-# Define paths using modular layout
-SCRIPT_DIR="./scripts"
-CORE_DIR="./core"
-OUTPUT_DIR="./html_outputs"
-CONFIG_DIR="./config"
-MODEL_DIR="./models"
+echo "[+] Starting BizOpsAgent pipeline..."
 
-# Log directories
-mkdir -p logs $OUTPUT_DIR
+# Optional: Terraform Infrastructure Pipeline
+if [ "$RUN_TERRAFORM" = "true" ]; then
+    echo "[*] Running Terraform pipeline..."
+    bash "$TERRAFORM_SCRIPT"
+else
+    echo "[*] Skipping Terraform pipeline."
+fi
 
-echo "🔍 Starting RAG Inspector Pipeline..."
-echo "🧩 Compliance Mode: $COMPLIANCE"
-echo "📄 Reference Directory: $REFERENCE_DIR"
-echo "📦 Output: $HTML_OUTPUT"
+# Optional: Model Training Pipeline
+if [ "$TRAIN_MODEL" = "true" ]; then
+    echo "[*] Running model training..."
+    bash "$TRAIN_MODEL_SCRIPT"
+else
+    echo "[*] Skipping model training."
+fi
 
-python3 $SCRIPT_DIR/run_rag_inspector.py \
-  --plan-json "$PLAN_JSON" \
-  --state-json "$STATE_JSON" \
-  --plan-file "$PLAN_FILE" \
-  --output-html "$OUTPUT_DIR/$HTML_OUTPUT" \
-  --reference-dir "$REFERENCE_DIR" \
-  --output-json "$OUTPUT_FILE" \
-  --offline "$OFFLINE_MODE"
+# RAG Compliance Inspection
+echo "[*] Running RAG Inspector..."
+bash "$RAG_INSPECTOR_SCRIPT"
 
-echo "✅ Finished generating report: $OUTPUT_DIR/$HTML_OUTPUT"
+# Optional: HTML Generation
+if [ "$GENERATE_HTML" = "true" ]; then
+    echo "[*] Generating HTML summary..."
+    bash "$HTML_GEN_SCRIPT"
+else
+    echo "[*] Skipping HTML generation."
+fi
+
+echo "[✓] Pipeline complete."

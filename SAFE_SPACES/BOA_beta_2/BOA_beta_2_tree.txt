@@ -15,15 +15,10 @@
 │       │   └── reference_loader.py
 │       ├── pipelines
 │       │   ├── html_generation.sh
-│       │   ├── html_generation.sh:Zone.Identifier
 │       │   ├── ollama_check.sh
-│       │   ├── ollama_check.sh:Zone.Identifier
 │       │   ├── run_rag_inspector.sh
-│       │   ├── run_rag_inspector.sh:Zone.Identifier
 │       │   ├── terraform_pipeline.sh
-│       │   ├── terraform_pipeline.sh:Zone.Identifier
-│       │   ├── train_model.sh
-│       │   └── train_model.sh:Zone.Identifier
+│       │   └── train_model.sh
 │       ├── rag_inspector.py
 │       ├── train_model.py
 │       └── training_pairs.py
@@ -89,6 +84,7 @@
 │       │       └── variables.tf
 │       ├── outputs.tf
 │       ├── providers.tf
+│       ├── terraform.tfvars
 │       └── variables.tf
 ├── main
 │   └── run.sh
@@ -97,4 +93,4 @@
         ├── generate_tf_plan_html.sh
         └── terraform_json_to_html.py
 
-27 directories, 71 files
+27 directories, 67 files
