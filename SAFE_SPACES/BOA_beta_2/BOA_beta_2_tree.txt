@@ -7,12 +7,15 @@
 │   │       └── blanket_compliance_prompt.txt
 │   └── scripts
 │       ├── core
+│       │   ├── debug_utils.py
 │       │   ├── embedding_setup.py
+│       │   ├── inspector_utils.py
 │       │   ├── llm_runner.py
 │       │   ├── output_validator.py
 │       │   ├── plan_parser.py
 │       │   ├── prompt_loader.py
-│       │   └── reference_loader.py
+│       │   ├── reference_loader.py
+│       │   └── schemas.py
 │       ├── pipelines
 │       │   ├── html_generation.sh
 │       │   ├── ollama_check.sh
@@ -91,7 +94,6 @@
 │   └── run.sh
 └── output
     └── scripts
-        ├── generate_tf_plan_html.sh
         └── terraform_json_to_html.py
 
-27 directories, 68 files
+27 directories, 70 files

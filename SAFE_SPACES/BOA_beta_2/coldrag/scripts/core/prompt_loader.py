@@ -1,6 +1,25 @@
-from pathlib import Path
+# coldrag/scripts/core/prompt_loader.py
 
-def load_prompt(path: str) -> str:
-    """Load a prompt template from a file."""
-    with open(path, 'r') as file:
-        return file.read()
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+DEFAULT_PROMPT_FILE = os.getenv("PROMPT_FILE", "blanket_compliance_prompt.txt")
+DEFAULT_PROMPTS_DIR = os.getenv("PROMPTS_DIR", "prompts/shared")
+
+def load_prompt_template(prompt_file: str = None) -> str:
+    """
+    Load a prompt template file from the configured prompts directory.
+    Falls back to the default prompt if none is provided.
+    """
+    filename = prompt_file or DEFAULT_PROMPT_FILE
+    prompts_path = Path(DEFAULT_PROMPTS_DIR)
+
+    prompt_path = prompts_path / filename
+    if not prompt_path.exists():
+        raise FileNotFoundError(f"Prompt template not found: {prompt_path}")
+    
+    with open(prompt_path, "r", encoding="utf-8") as file:
+        return file.read().strip()
