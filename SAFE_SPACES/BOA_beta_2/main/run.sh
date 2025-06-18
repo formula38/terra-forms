@@ -17,8 +17,12 @@ else
     exit 1
 fi
 
+# --- Make all .sh scripts executable ---
+echo "🔐 Making all .sh files under $ROOT_DIR executable..."
+find "$ROOT_DIR" -type f -name "*.sh" -exec chmod +x {} \;
+
 # --- Virtual Environment Setup ---
-bash "${SCRIPT_DIR}/scripts/setup_env.sh"
+bash "${SETUP_ENV_SCRIPT}"
 
 # --- Ollama Check ---
 if [ "$CHECK_OLLAMA" = "true" ]; then
