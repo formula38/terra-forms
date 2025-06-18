@@ -1,43 +1,57 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Load environment variables
-if [ -f .env ]; then
-    echo "Loading environment variables from .env..."
-    export $(grep -v '^#' .env | xargs)
+echo "🔧 Starting BizOpsAgent pipeline..."
+
+# --- Load environment variables ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="${SCRIPT_DIR}/.."
+
+if [ -f "${ROOT_DIR}/.env" ]; then
+    echo "📥 Loading environment variables from .env..."
+    set -a
+    source "${ROOT_DIR}/.env"
+    set +a
 else
-    echo ".env file not found. Exiting."
+    echo "❌ .env file not found at root. Exiting."
     exit 1
 fi
 
-echo "[+] Starting BizOpsAgent pipeline..."
+# --- Virtual Environment Setup ---
+bash "${SCRIPT_DIR}/scripts/setup_env.sh"
 
-# Optional: Terraform Infrastructure Pipeline
+# --- Ollama Check ---
+if [ "$CHECK_OLLAMA" = "true" ]; then
+    echo "🔍 Running Ollama availability check..."
+    bash "$OLLAMA_CHECK_SCRIPT"
+fi
+
+# --- Terraform Pipeline ---
 if [ "$RUN_TERRAFORM" = "true" ]; then
-    echo "[*] Running Terraform pipeline..."
+    echo "📐 Running Terraform plan pipeline..."
     bash "$TERRAFORM_SCRIPT"
 else
-    echo "[*] Skipping Terraform pipeline."
+    echo "⏭️ Skipping Terraform pipeline."
 fi
 
-# Optional: Model Training Pipeline
+# --- Model Training ---
 if [ "$TRAIN_MODEL" = "true" ]; then
-    echo "[*] Running model training..."
+    echo "🧠 Training embedding model..."
     bash "$TRAIN_MODEL_SCRIPT"
 else
-    echo "[*] Skipping model training."
+    echo "⏭️ Skipping model training."
 fi
 
-# RAG Compliance Inspection
-echo "[*] Running RAG Inspector..."
+# --- RAG Compliance Inspector ---
+echo "🕵️ Running RAG Inspector..."
 bash "$RAG_INSPECTOR_SCRIPT"
 
-# Optional: HTML Generation
+# --- HTML Report Generation ---
 if [ "$GENERATE_HTML" = "true" ]; then
-    echo "[*] Generating HTML summary..."
+    echo "🖼️ Generating HTML summary..."
     bash "$HTML_GEN_SCRIPT"
 else
-    echo "[*] Skipping HTML generation."
+    echo "⏭️ Skipping HTML generation."
 fi
 
-echo "[✓] Pipeline complete."
+echo "✅ BizOpsAgent pipeline complete."

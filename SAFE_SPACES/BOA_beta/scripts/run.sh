@@ -60,8 +60,6 @@ fi
 if [ "$OFFLINE_MODE" = false ]; then
   pip install --upgrade pip --break-system-packages
   pip install -r "${ESTIMATOR_DIR}/requirements.txt" --break-system-packages
-  RAG_REQ="${SCRIPT_DIR}/requirements-rag.txt"
-  pip install -r "$RAG_REQ" --break-system-packages
 else
   echo "🚫 Offline mode enabled — skipping pip installs"
 fi

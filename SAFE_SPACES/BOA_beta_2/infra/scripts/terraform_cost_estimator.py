@@ -3,6 +3,7 @@ import json
 from pricing import get_live_price
 from utils import infer_module, format_cost
 
+
 # Static fallback prices (used when --live is False or pricing fails)
 STATIC_PRICES = {
     "aws_instance": 25.0,

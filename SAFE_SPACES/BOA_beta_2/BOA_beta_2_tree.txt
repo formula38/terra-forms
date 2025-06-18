@@ -20,6 +20,7 @@
 │       │   ├── terraform_pipeline.sh
 │       │   └── train_model.sh
 │       ├── rag_inspector.py
+│       ├── setup_env.sh
 │       ├── train_model.py
 │       └── training_pairs.py
 ├── config
@@ -93,4 +94,4 @@
         ├── generate_tf_plan_html.sh
         └── terraform_json_to_html.py
 
-27 directories, 67 files
+27 directories, 68 files
