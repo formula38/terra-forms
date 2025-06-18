@@ -21,8 +21,10 @@ def validate_and_write_output(response: dict, plan_path: str, output_path: str):
     parsed = None
     try:
         parsed = json.loads(raw_output_clean) if isinstance(raw_output_clean, str) else raw_output_clean
+        
         # Optional: validate using Pydantic
         # validated = ComplianceViolation(**parsed)
+        
         with open(output_path, "w") as f:
             json.dump(parsed, f, indent=2)
         print(f"✅ Parsed and saved structured output to: {output_path}")
@@ -32,3 +34,13 @@ def validate_and_write_output(response: dict, plan_path: str, output_path: str):
         with open(fallback, "w") as f:
             f.write(raw_output_clean if isinstance(raw_output_clean, str) else str(raw_output_clean))
         print(f"⚠️ Raw output still saved to: {fallback}")
+
+        # Always write a fallback compliant structure
+        fallback_json = {
+            "violations": [],
+            "recommendations": []
+        }
+        with open(output_path, "w") as f:
+            json.dump(fallback_json, f, indent=2)
+        print(f"📝 Fallback empty compliance JSON written to: {output_path}")
+

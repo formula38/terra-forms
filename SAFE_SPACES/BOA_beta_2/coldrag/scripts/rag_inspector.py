@@ -29,6 +29,19 @@ parser.add_argument("output_path", help="Path to save compliance JSON")
 parser.add_argument("--refdir", help="Optional directory of static compliance references")
 args = parser.parse_args()
 
+##############################################
+# Check for required binaries and Python packages (debugging)
+import importlib.util
+import shutil
+
+if shutil.which("jq") is None:
+    print("❌ 'jq' binary not found. Please install via your package manager.")
+
+if importlib.util.find_spec("pypdf") is None:
+    print("❌ 'pypdf' not found in current environment.")
+
+############################################
+
 # --- Step 1: Load Terraform plan or state JSON ---
 print("📄 Parsing Terraform input file...")
 docs = load_terraform_docs(args.plan_json)

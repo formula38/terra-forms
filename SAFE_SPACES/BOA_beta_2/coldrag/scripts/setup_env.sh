@@ -29,7 +29,18 @@ fi
 if [ "$OFFLINE_MODE" = "false" ] && [ "$INSTALL_REQUIREMENTS" = "true" ]; then
     echo "📦 Installing dependencies from $REQUIREMENTS_FILE..."
     pip install --upgrade pip --break-system-packages
-    pip install -r "${REQUIREMENTS_FILE}" jq pypdf --break-system-packages
+    pip install -r "${REQUIREMENTS_FILE}" --break-system-packages
 else
     echo "🚫 Skipping dependency installation."
+fi
+
+# Ensure jq is installed for JSON processing
+if command -v apt-get &> /dev/null; then
+    echo "📦 Ensuring system packages: jq"
+    sudo apt-get update && sudo apt-get install -y jq
+elif command -v brew &> /dev/null; then
+    echo "📦 Ensuring system packages via Homebrew: jq"
+    brew install jq
+else
+    echo "⚠️ Unsupported system package manager. Please install jq manually."
 fi

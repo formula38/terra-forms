@@ -1,10 +1,10 @@
 # Price Estimator Dependencies
 boto3
 pytz
-jq
 python-dotenv
 pymupdf
 pypdf
+jq
 
 # COLDRAG Dependencies
 langchain
