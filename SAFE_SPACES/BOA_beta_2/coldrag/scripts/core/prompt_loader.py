@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-DEFAULT_PROMPT_FILE = os.getenv("PROMPT_FILE", "blanket_compliance_prompt.txt")
-DEFAULT_PROMPTS_DIR = os.getenv("PROMPTS_DIR", "prompts/shared")
+DEFAULT_PROMPTS_DIR = os.getenv("DEFAULT_PROMPTS_DIR", "prompts/shared")
+DEFAULT_PROMPT_FILE = os.getenv("DEFAULT_PROMPT_FILE", "blanket_compliance_prompt.txt")
 
 def load_prompt_template(prompt_file: str = None) -> str:
     """

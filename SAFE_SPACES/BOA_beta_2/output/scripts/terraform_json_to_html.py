@@ -6,6 +6,18 @@ import datetime
 import getpass
 import os
 import logging
+import argparse
+
+# --- CLI Argument Parsing ---
+parser = argparse.ArgumentParser(description="Generate Terraform HTML Summary")
+parser.add_argument("--input", required=True, help="Path to Terraform plan JSON")
+parser.add_argument("--output", required=True, help="Path to save the HTML output")
+parser.add_argument("--theme", default="dark", choices=["dark", "light"], help="Theme for the HTML report")
+args = parser.parse_args()
+
+tf_json_path = args.input
+html_output_path = args.output
+theme = args.theme
 
 # Setup logging
 logging.basicConfig(
@@ -20,7 +32,7 @@ if len(sys.argv) >= 4:
 
 # Add the estimator module path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-estimator_path = os.path.abspath(os.path.join(current_dir, "./terraform-cost-estimator"))
+estimator_path = os.path.abspath(os.path.join(current_dir, "../../infra/scripts"))
 sys.path.insert(0, estimator_path)
 from estimator import estimate_cost  # Live pricing
 
@@ -385,7 +397,7 @@ if __name__ == "__main__":
         'findings',
         'compliance_violations.json'
     )
-    with open(tf_json_path, "r") as f:
+    with open(args.input, "r") as f:
         tf_data = json.load(f)
     import logging
     try:
@@ -408,6 +420,6 @@ if __name__ == "__main__":
         }
 
     html = generate_html(tf_data, comp_data)
-    with open(html_output_path, "w") as f:
+    with open(args.output, "w") as f:
         f.write(html)
         

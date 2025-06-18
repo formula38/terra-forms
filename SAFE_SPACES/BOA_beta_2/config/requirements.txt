@@ -1,11 +1,14 @@
 # Price Estimator Dependencies
 boto3
 pytz
+jq
+python-dotenv
+pymupdf
+pypdf
 
 # COLDRAG Dependencies
 langchain
 langchain-community
-pymupdf
 pydantic
 datasets
 tiktoken

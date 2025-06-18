@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Modular RAG Inspector Script: Uses LangChain + Pydantic + Custom Modules to Analyze Terraform JSON"""
 
-import os
+import os, sys
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
+
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(ROOT_DIR))
 
 from coldrag.scripts.core.plan_parser import load_terraform_docs
 from coldrag.scripts.core.reference_loader import load_reference_docs
@@ -12,12 +15,12 @@ from coldrag.scripts.core.embedding_setup import load_embeddings_and_retriever
 from coldrag.scripts.core.llm_runner import init_llm, run_rag_chain
 from coldrag.scripts.core.prompt_loader import load_prompt_template
 from coldrag.scripts.core.output_validator import validate_and_write_output
-from coldrag.scripts.core.debug_utils import log_loaded_docs, log_llm_sources
+from coldrag.scripts.core.inspector_utils import log_loaded_docs, log_llm_sources
 
 # --- Load environment variables ---
 load_dotenv()
 MODEL_PATH = os.getenv("EMBEDDING_MODEL")
-PROMPT_FILE = os.getenv("PROMPT_FILE", "blanket_compliance_prompt.txt")
+PROMPT_FILE = os.getenv("DEFAULT_PROMPT_FILE", "blanket_compliance_prompt.txt")
 
 # --- CLI Setup ---
 parser = argparse.ArgumentParser(description="RAG compliance analyzer for Terraform plans")
