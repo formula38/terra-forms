@@ -19,10 +19,12 @@ fi
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 
 # Execute Python script with or without reference docs
+RAG_SCRIPT_PATH="${RAG_INSPECTOR_MODULE:-coldrag/scripts/core/rag_inspector.py}"
+
 if [[ -d "$REFERENCE_DIR" ]]; then
   echo "📂 Including reference docs from $REFERENCE_DIR"
-  python3 coldrag/scripts/rag_inspector.py "$PLAN_INPUT" "$OUTPUT_FILE" --refdir "$REFERENCE_DIR"
+  python3 "$RAG_SCRIPT_PATH" "$PLAN_INPUT" "$OUTPUT_FILE" --refdir "$REFERENCE_DIR"
 else
   echo "⚠️ Reference directory not found — running without"
-  python3 coldrag/scripts/rag_inspector.py "$PLAN_INPUT" "$OUTPUT_FILE"
+  python3 "$RAG_SCRIPT_PATH" "$PLAN_INPUT" "$OUTPUT_FILE"
 fi

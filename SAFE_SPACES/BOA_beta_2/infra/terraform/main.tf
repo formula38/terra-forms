@@ -114,6 +114,7 @@ module "compute" {
   security_group_ids = [module.networking.security_group_id]
   kms_key_arn        = module.kms.kms_key_arn
   data_bucket_arn    = module.s3.data_bucket_arn
+  user_data_script_path = var.user_data_script_path
   common_tags        = local.common_tags
 }
 

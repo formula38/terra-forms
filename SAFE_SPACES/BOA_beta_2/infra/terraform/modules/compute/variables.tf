@@ -54,7 +54,6 @@ variable "common_tags" {
 variable "user_data_script_path" {
   type        = string
   description = "Path to the EC2 user data script"
-  default     = "scripts/ec2_user_data.sh"
 }
 
 variable "ebs_device_name" {

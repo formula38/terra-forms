@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./CMMC/terraform-cost-"
+        "./CMMC/terraform-cost-",
+        "./BOA_beta_2/coldrag/scripts/core"
     ]
 }

@@ -36,6 +36,11 @@ variable "instance_type" {
   type        = string
 }
 
+variable "user_data_script_path" {
+  description = "Path to the EC2 user data script"
+  type        = string
+}
+
 # =============================
 # RDS Module
 # =============================
