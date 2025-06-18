@@ -13,11 +13,13 @@ parser = argparse.ArgumentParser(description="Generate Terraform HTML Summary")
 parser.add_argument("--input", required=True, help="Path to Terraform plan JSON")
 parser.add_argument("--output", required=True, help="Path to save the HTML output")
 parser.add_argument("--theme", default="dark", choices=["dark", "light"], help="Theme for the HTML report")
+parser.add_argument("--compliance", default="output/findings/compliance_violations.json", help="Path to compliance results JSON")
 args = parser.parse_args()
 
 tf_json_path = args.input
 html_output_path = args.output
 theme = args.theme
+compliance_json_path = args.compliance
 
 # Setup logging
 logging.basicConfig(
@@ -393,7 +395,7 @@ if __name__ == "__main__":
     html_output_path = sys.argv[2]
     script_dir = os.path.dirname(os.path.abspath(__file__))
     compliance_json_path = os.path.join(
-        script_dir,
+        # script_dir,
         'findings',
         'compliance_violations.json'
     )
@@ -401,7 +403,7 @@ if __name__ == "__main__":
         tf_data = json.load(f)
     import logging
     try:
-        with open(compliance_json_path, "r") as f:
+        with open(args.compliance, "r") as f:
             comp_data = json.load(f)
         if not isinstance(comp_data, dict) or "violations" not in comp_data:
             logging.warning("⚠️ Invalid compliance_violations.json structure — skipping compliance tab.")

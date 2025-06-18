@@ -11,6 +11,7 @@ fi
 mkdir -p "$(dirname "$HTML_OUTPUT")"
 
 python3 ${ROOT_DIR}/output/scripts/terraform_json_to_html.py \
-  --input "${PLAN_JSON}" \
-  --output "${HTML_OUTPUT}" \
-  --theme "${THEME}"
+  --input "$PLAN_JSON" \
+  --output "$HTML_OUTPUT" \
+  --theme "$THEME" \
+  --compliance "$OUTPUT_FILE"

@@ -29,7 +29,7 @@ fi
 if [ "$OFFLINE_MODE" = "false" ] && [ "$INSTALL_REQUIREMENTS" = "true" ]; then
     echo "📦 Installing dependencies from $REQUIREMENTS_FILE..."
     pip install --upgrade pip --break-system-packages
-    pip install -r "${REQUIREMENTS_FILE}" --break-system-packages
+    pip install -r "${REQUIREMENTS_FILE}" jq pypdf --break-system-packages
 else
     echo "🚫 Skipping dependency installation."
 fi

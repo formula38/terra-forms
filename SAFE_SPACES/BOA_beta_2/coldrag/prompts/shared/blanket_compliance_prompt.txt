@@ -1,4 +1,4 @@
-Evaluate a Terraform hybrid cloud deployment for compliance with the following standards:
+Evaluate this Terraform deployment for security and compliance violations against the following standards:
 
 - HIPAA
 - PCI-DSS
@@ -13,40 +13,40 @@ Evaluate a Terraform hybrid cloud deployment for compliance with the following s
 - CIS AWS
 - CIS Azure
 - CIS GCP
-- CIS
+- CIS Generic
 
 ---
-📊 STRUCTURE PER STANDARD
+📂 ORGANIZE VIOLATIONS BY CATEGORY
 
-Group findings per standard using:
+Use the following technical control categories to group and interpret violations:
 
-- Encryption (at rest, in transit, backups)
-- IAM (MFA, least privilege, SoD, rotation)
-- Logging & Monitoring (CloudTrail, SIEM, GuardDuty, Config)
-- Networking (subnet isolation, NACLs, DNS, WAF, egress/ingress)
+- Encryption (data at rest, in transit, backups)
+- IAM (least privilege, MFA, key rotation, separation of duties)
+- Logging & Monitoring (CloudTrail, SIEM, Config, GuardDuty)
+- Networking (VPCs, subnet isolation, NACLs, DNS, egress/ingress filtering, WAF)
 - Data Residency & Sovereignty
-- Incident Response (if applicable)
-- Infrastructure Hygiene (patching, CVEs, lifecycle)
+- Incident Response readiness (if detectable)
+- Infrastructure Hygiene (patching, CVEs, unused resources)
 
 ---
-📤 OUTPUT FORMAT
+📤 RESPONSE FORMAT
 
-Return raw JSON with this exact structure:
+Respond ONLY with a single raw JSON object using this exact schema:
 ```json
 {
   "violations": [
     {
       "resource_type": "aws_security_group",
       "resource_name": "open_sg",
-      "compliance_concern": "Open ingress on 0.0.0.0/0",
-      "standards": ["PCI-DSS", "NIST"],
+      "compliance_concern": "Open ingress from 0.0.0.0/0",
+      "standards": ["PCI-DSS", "CIS AWS"],
       "severity": "High",
-      "remediation": "Restrict ingress to known IPs and necessary ports only"
+      "remediation": "Restrict ingress traffic to known IPs and only required ports"
     }
   ],
   "recommendations": [
-    "Enable GuardDuty and Config",
-    "Rotate IAM credentials every 90 days",
-    "Use Terraform modules with secure defaults"
+    "Enable AWS Config and GuardDuty",
+    "Use Terraform modules with secure defaults",
+    "Rotate IAM user keys every 90 days"
   ]
 }
