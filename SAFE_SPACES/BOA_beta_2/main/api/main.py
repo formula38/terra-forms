@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Optional
+from fastapi.staticfiles import StaticFiles
+
 
 # ✅ Create app first
 app = FastAPI()
+# app.mount("/", StaticFiles(directory="frontend/bizops-dashboard/dist/bizops-dashboard", html=True), name="static")
 
 # ✅ Register middleware AFTER app is defined
 app.add_middleware(
@@ -18,17 +22,18 @@ app.add_middleware(
 class RAGRequest(BaseModel):
     plan_json: str
     output_path: str
-    refdir: str | None = None
+    refdir: Optional[str] = None
 
 @app.get("/")
 def root():
     return {"message": "BizOpsAgent FastAPI is live 🎯"}
 
 @app.post("/rag")
-def run_rag(req: RAGRequest):
-    # Placeholder logic for now
+async def rag_handler(payload: RAGRequest):
     return {
-        "plan_json": req.plan_json,
-        "output_path": req.output_path,
-        "refdir": req.refdir or "None"
+        "message": "RAG handler received",
+        "plan_json": payload.plan_json,
+        "output_path": payload.output_path,
+        "refdir": payload.refdir
     }
+
