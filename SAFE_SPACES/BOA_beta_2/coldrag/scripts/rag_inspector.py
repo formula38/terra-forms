@@ -71,3 +71,29 @@ log_llm_sources(response)
 validate_and_write_output(response, args.plan_json, args.output_path)
 
 print("✅ RAG Inspector analysis complete.")
+
+# coldrag/scripts/rag_inspector.py
+
+def run_rag_pipeline(plan_path: Path, output_path: Path, ref_docs_enabled=True) -> dict:
+    """
+    Programmatic version of the CLI rag_inspector.
+    """
+    import os
+    from coldrag.scripts.core.reference_loader import load_reference_docs
+    from coldrag.scripts.core.plan_parser import load_terraform_docs
+    from coldrag.scripts.core.embedding_setup import build_faiss_index
+    from coldrag.scripts.core.llm_runner import run_llm_query
+    from coldrag.scripts.core.output_validator import validate_and_write_output
+
+    plan_docs = load_terraform_docs(str(plan_path))
+
+    reference_docs = []
+    if ref_docs_enabled:
+        ref_dir = os.getenv("REFERENCE_DIR", "")
+        reference_docs = load_reference_docs(ref_dir)
+
+    retriever = build_faiss_index(reference_docs)
+    response = run_llm_query(plan_docs, retriever)
+    validate_and_write_output(response, str(plan_path), str(output_path))
+
+    return {"status": "analysis complete"}

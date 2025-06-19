@@ -5,6 +5,8 @@ python-dotenv
 pymupdf
 pypdf
 jq
+fastapi
+uvicorn[standard]
 
 # COLDRAG Dependencies
 langchain

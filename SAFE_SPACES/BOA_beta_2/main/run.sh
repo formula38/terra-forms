@@ -22,6 +22,17 @@ echo "🔐 Making all .sh files under $ROOT_DIR executable..."
 find "$ROOT_DIR" -type f -name "*.sh" -exec chmod +x {} \;
 
 # --- Virtual Environment Setup ---
+if [ "$SETUP_VENV" = "true" ]; then
+    VENV_DIR="${ROOT_DIR}/${VENV_PATH}"
+    if [ -d "$VENV_DIR" ]; then
+        echo "🔁 Re-activating virtual environment at $VENV_DIR..."
+        source "${VENV_DIR}/bin/activate"
+    else
+        echo "❌ Virtual environment not found at $VENV_DIR. Cannot start server."
+        exit 1
+    fi
+fi
+
 bash "${SETUP_ENV_SCRIPT}"
 
 # --- Ollama Check ---
@@ -59,3 +70,30 @@ else
 fi
 
 echo "✅ BizOpsAgent pipeline complete."
+
+
+# --- Reactivate venv for FastAPI ---
+if [ "$SETUP_VENV" = "true" ]; then
+    VENV_DIR="${ROOT_DIR}/${VENV_PATH}"
+    if [ -d "$VENV_DIR" ]; then
+        echo "🔁 Re-activating virtual environment at $VENV_DIR..."
+        source "${VENV_DIR}/bin/activate"
+    else
+        echo "❌ Virtual environment not found at $VENV_DIR. Cannot start server."
+        exit 1
+    fi
+fi
+
+
+# --- Start FastAPI Server ---
+FASTAPI_PORT="${FASTAPI_PORT:-8000}"
+FASTAPI_HOST="${FASTAPI_HOST:-127.0.0.1}"
+
+if [ "${START_FASTAPI:-false}" = "true" ]; then
+    echo "🚀 Launching FastAPI server..."
+    cd "${ROOT_DIR}" || exit 1
+    uvicorn main.api.main:app --reload --host "$FASTAPI_HOST" --port "$FASTAPI_PORT"
+else
+    echo "⏭️ Skipping FastAPI server launch."
+fi
+
