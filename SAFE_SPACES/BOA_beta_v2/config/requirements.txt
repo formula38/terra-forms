@@ -1,0 +1,23 @@
+# Price Estimator Dependencies
+boto3
+pytz
+python-dotenv
+pymupdf
+pypdf
+jq
+fastapi
+uvicorn[standard]
+
+# COLDRAG Dependencies
+langchain
+langchain-community
+pydantic
+datasets
+tiktoken
+faiss-cpu
+transformers
+sentence-transformers
+langchain-ollama
+langchain-huggingface
+transformers[torch]
+accelerate>=0.26.0
