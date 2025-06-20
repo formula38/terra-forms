@@ -1,4 +1,4 @@
-# coldrag/scripts/core/prompt_loader.py
+# coldrag/scripts/utils/prompt_loader.py
 
 import os
 from pathlib import Path

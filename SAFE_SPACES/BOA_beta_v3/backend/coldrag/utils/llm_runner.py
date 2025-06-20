@@ -1,4 +1,4 @@
-# coldrag/scripts/core/llm_runner.py
+# coldrag/scripts/utils/llm_runner.py
 
 import os
 from dotenv import load_dotenv

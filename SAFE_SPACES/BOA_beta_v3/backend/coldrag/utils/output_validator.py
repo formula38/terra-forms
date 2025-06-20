@@ -1,7 +1,7 @@
 import json
 import re
 from pathlib import Path
-from backend.coldrag.core.schemas import ComplianceViolation  # if using Pydantic
+from backend.coldrag.train.schemas import ComplianceViolation  # if using Pydantic
 from typing import Union
 
 def clean_llm_response(raw):
