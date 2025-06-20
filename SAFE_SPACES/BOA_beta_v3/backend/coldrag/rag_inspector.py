@@ -9,13 +9,13 @@ from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
-from coldrag.core.plan_parser import load_terraform_docs
-from coldrag.core.reference_loader import load_reference_docs
-from coldrag.core.embedding_setup import load_embeddings_and_retriever
-from coldrag.core.llm_runner import init_llm, run_rag_chain
-from coldrag.core.prompt_loader import load_prompt_template
-from coldrag.core.output_validator import validate_and_write_output
-from coldrag.core.inspector_utils import log_loaded_docs, log_llm_sources
+from backend.coldrag.core.plan_parser import load_terraform_docs
+from backend.coldrag.core.reference_loader import load_reference_docs
+from backend.coldrag.core.embedding_setup import load_embeddings_and_retriever
+from backend.coldrag.core.llm_runner import init_llm, run_rag_chain
+from backend.coldrag.core.prompt_loader import load_prompt_template
+from backend.coldrag.core.output_validator import validate_and_write_output
+from backend.coldrag.core.inspector_utils import log_loaded_docs, log_llm_sources
 
 # --- Load environment variables ---
 load_dotenv()
@@ -79,11 +79,11 @@ def run_rag_pipeline(plan_path: Path, output_path: Path, ref_docs_enabled=True) 
     Programmatic version of the CLI rag_inspector.
     """
     import os
-    from coldrag.scripts.core.reference_loader import load_reference_docs
-    from coldrag.scripts.core.plan_parser import load_terraform_docs
-    from coldrag.scripts.core.embedding_setup import build_faiss_index
-    from coldrag.scripts.core.llm_runner import run_llm_query
-    from coldrag.scripts.core.output_validator import validate_and_write_output
+    from backend.coldrag.core.reference_loader import load_reference_docs
+    from backend.coldrag.core.plan_parser import load_terraform_docs
+    from backend.coldrag.core.embedding_setup import build_faiss_index
+    from backend.coldrag.core.llm_runner import run_llm_query
+    from backend.coldrag.core.output_validator import validate_and_write_output
 
     plan_docs = load_terraform_docs(str(plan_path))
 
