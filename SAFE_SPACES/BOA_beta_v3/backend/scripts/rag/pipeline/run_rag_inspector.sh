@@ -18,13 +18,16 @@ fi
 # Create findings dir if not exists
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 
+# Get the virtual environment python path
+VENV_PYTHON="${ROOT_DIR}/${VENV_PATH}/bin/python3"
+
 # Execute Python script with or without reference docs
 RAG_SCRIPT_PATH="${RAG_INSPECTOR_MODULE:-coldrag/scripts/core/rag_inspector.py}"
 
 if [[ -d "$REFERENCE_DIR" ]]; then
   echo "📂 Including reference docs from $REFERENCE_DIR"
-  python3 "$RAG_SCRIPT_PATH" "$PLAN_INPUT" "$OUTPUT_FILE" --refdir "$REFERENCE_DIR"
+  "$VENV_PYTHON" "$RAG_SCRIPT_PATH" "$PLAN_INPUT" "$OUTPUT_FILE" --refdir "$REFERENCE_DIR"
 else
   echo "⚠️ Reference directory not found — running without"
-  python3 "$RAG_SCRIPT_PATH" "$PLAN_INPUT" "$OUTPUT_FILE"
+  "$VENV_PYTHON" "$RAG_SCRIPT_PATH" "$PLAN_INPUT" "$OUTPUT_FILE"
 fi

@@ -39,7 +39,7 @@ fi
 # Ensure jq is installed for JSON processing
 if command -v apt-get &> /dev/null; then
     echo "📦 Ensuring system packages: jq"
-    sudo apt-get update && sudo apt-get install -y jq
+    # sudo apt-get update && sudo apt-get install -y jq
 else
     echo "⚠️ Unsupported system package manager. Please install jq manually."
 fi
