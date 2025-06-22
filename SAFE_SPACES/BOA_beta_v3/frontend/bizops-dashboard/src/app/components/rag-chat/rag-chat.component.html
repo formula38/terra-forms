@@ -1,2 +1,81 @@
 <!-- src/app/components/rag-chat/rag-chat.component.html -->
-<button (click)="callRAG()">Run RAG Inspector</button>
+<div class="chat-container">
+  <div class="chat-header">
+    <h2>🔍 Terraform Compliance Assistant</h2>
+    <p>Ask me about your infrastructure compliance and security</p>
+  </div>
+
+  <div class="chat-messages" #messageContainer>
+    <div
+      *ngFor="let message of messages"
+      class="message"
+      [ngClass]="message.sender === 'user' ? 'user-message' : 'bot-message'"
+    >
+      <div class="message-content">
+        <div class="message-text">{{ message.content }}</div>
+        <div class="message-time">{{ message.timestamp | date:'shortTime' }}</div>
+      </div>
+
+      <!-- Show analysis results if available -->
+      <ng-container *ngIf="getComplianceViolations(message).length > 0">
+        <div class="analysis-results">
+          <h4>🔍 Compliance Analysis Results:</h4>
+          <div class="violations-list">
+            <div *ngFor="let violation of getComplianceViolations(message)" class="violation-item">
+              <span class="violation-type">{{ violation?.type || 'Unknown' }}</span>
+              <span class="violation-description">{{ violation?.description || 'No description available' }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="message bot-message">
+      <div class="message-content">
+        <div class="loading-indicator">
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="message-time">Analyzing...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <div class="input-container">
+      <input
+        #messageInput
+        type="text"
+        [(ngModel)]="currentMessage"
+        (keyup.enter)="sendMessage()"
+        placeholder="Ask about your Terraform compliance..."
+        [disabled]="isLoading"
+        class="message-input"
+      >
+      <button
+        (click)="sendMessage()"
+        [disabled]="!currentMessage.trim() || isLoading"
+        class="send-button"
+      >
+        <span *ngIf="!isLoading">Send</span>
+        <span *ngIf="isLoading">Sending...</span>
+      </button>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="quick-actions">
+      <button
+        *ngFor="let action of quickActions"
+        (click)="sendQuickMessage(action.message)"
+        class="quick-action-btn"
+        [disabled]="isLoading"
+      >
+        {{ action.label }}
+      </button>
+    </div>
+  </div>
+</div>
