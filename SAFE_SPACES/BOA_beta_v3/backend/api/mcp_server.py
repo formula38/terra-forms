@@ -187,7 +187,3 @@ async def analyze_costs(request: MCPRequest):
     if not agent:
         raise HTTPException(status_code=404, detail="Cost agent not found")
     return await agent.execute_action(request.action, request.parameters)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("api.mcp_server:app", reload=True) 
