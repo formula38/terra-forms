@@ -4,6 +4,8 @@ import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { MCPRequest, MCPResponse } from '../models/mcp';
 
+export type { MCPRequest, MCPResponse };
+
 export interface Agent {
   agent_id: string;
   name: string;
@@ -36,7 +38,7 @@ export class MCPService {
 
   // The WebSocket URL remains the same, pointing to the backend for real-time updates.
   private wsUrl = 'ws://localhost:8000/mcp/ws';
-  private wsSubject?: WebSocketSubject<MCPResponse>;
+  private wsSubject?: WebSocketSubject<any>;
   private sessionId = this.generateSessionId();
   private connectionStatus = new BehaviorSubject<boolean>(false);
 

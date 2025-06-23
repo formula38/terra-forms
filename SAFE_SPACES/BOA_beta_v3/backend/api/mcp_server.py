@@ -14,14 +14,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-# Add the backend directory to the path
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+# Correct the system path for the Docker container
+# The Dockerfile copies the 'backend' directory contents to '/app'
+ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
-from backend.mcp_server_legacy import mcp_host
-from backend.mcp_protocol import MCPRequest, MCPResponse, mcp_protocol
-from backend.mcp_tools import TerraformAnalyzerTool, ComplianceReporterTool, SecurityAuditorTool, CostAnalyzerTool, DocumentGeneratorTool
-from backend.mcp_agents import ComplianceAgent, SecurityAgent, CostAgent
+from mcp_server_legacy import mcp_host
+from mcp_protocol import MCPRequest, MCPResponse, mcp_protocol
+from mcp_tools import TerraformAnalyzerTool, ComplianceReporterTool, SecurityAuditorTool, CostAnalyzerTool, DocumentGeneratorTool
+from mcp_agents import ComplianceAgent, SecurityAgent, CostAgent
 
 # Create FastAPI app
 app = FastAPI(
