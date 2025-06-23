@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Main MCP Server"""
 
-import argparse
 import asyncio
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 class Tool:
     """Base class for all tools"""
@@ -52,18 +51,20 @@ class Agent:
 class MCPHost:
     """MCP Host"""
     def __init__(self):
-        self.agents: Dict[str, Agent] = {}
-        self.tools: Dict[str, Tool] = {}
+        self.agents: Dict[str, "Agent"] = {}
+        self.tools: Dict[str, "Tool"] = {}
 
-    def register_agent(self, agent: Agent):
+    def register_agent(self, agent: "Agent"):
         """Register an agent"""
         self.agents[agent.agent_id] = agent
+        print(f"Agent '{agent.name}' registered.")
 
-    def register_tool(self, tool: Tool):
+    def register_tool(self, tool: "Tool"):
         """Register a tool"""
         self.tools[tool.tool_id] = tool
+        print(f"Tool '{tool.name}' registered.")
 
-    def get_agent(self, agent_id: str) -> Agent:
+    def get_agent(self, agent_id: str) -> "Agent":
         """Get an agent"""
         return self.agents.get(agent_id)
 
@@ -78,24 +79,4 @@ class MCPHost:
             "tools": list(self.tools.keys())
         }
 
-mcp_host = MCPHost()
-
-def main():
-    """Main function"""
-    parser = argparse.ArgumentParser(description="MCP Server")
-    parser.add_argument("plan_json", help="Path to Terraform plan JSON file")
-    parser.add_argument("output_path", help="Path to save analysis results")
-    parser.add_argument("--refdir", help="Optional directory of compliance references")
-    args = parser.parse_args()
-
-    from backend.mcp_tools.rag_tools import TerraformAnalyzerTool
-    analyzer = TerraformAnalyzerTool()
-    params = {
-        "plan_json": args.plan_json,
-        "output_path": args.output_path,
-        "refdir": args.refdir
-    }
-    asyncio.run(analyzer.invoke(params))
-
-if __name__ == "__main__":
-    main() 
+mcp_host = MCPHost() 

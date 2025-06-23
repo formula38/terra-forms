@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from backend.mcp_server import Agent
+from mcp_server_legacy import Agent
 
 class ComplianceAgent(Agent):
     """Agent specialized in compliance analysis and reporting"""
@@ -218,19 +218,18 @@ class ComplianceAgent(Agent):
             }
     
     async def _invoke_tool(self, tool_id: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Invoke a tool through the MCP host"""
-        # This would be implemented to work with the MCP host
-        # For now, we'll simulate tool invocation
-        from backend.mcp_server import mcp_host
-        
+        """Invoke a tool and return the result"""
+        from mcp_server_legacy import mcp_host
         tool = mcp_host.get_tool(tool_id)
-        if tool:
-            return await tool.invoke(parameters)
-        else:
+        if not tool:
             return {
                 "status": "error",
-                "error": f"Tool {tool_id} not found"
+                "error": f"Tool '{tool_id}' not found",
+                "timestamp": datetime.now().isoformat()
             }
+        
+        # Execute the tool's action
+        return await tool.invoke(parameters)
     
     def _count_violations(self, analysis_file: str) -> int:
         """Count violations in analysis file"""

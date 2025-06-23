@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from backend.mcp_server import Agent
+from mcp_server_legacy import Agent
 
 class CostAgent(Agent):
     """Agent specialized in cost analysis and optimization"""
@@ -323,14 +323,15 @@ class CostAgent(Agent):
         return trend_data
     
     async def _invoke_tool(self, tool_id: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Invoke a tool through the MCP host"""
-        from backend.mcp_server import mcp_host
-        
+        """Invoke a tool and return the result"""
+        from mcp_server_legacy import mcp_host
         tool = mcp_host.get_tool(tool_id)
-        if tool:
-            return await tool.invoke(parameters)
-        else:
+        if not tool:
             return {
                 "status": "error",
-                "error": f"Tool {tool_id} not found"
-            } 
+                "error": f"Tool '{tool_id}' not found",
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        # Execute the tool's action
+        return await tool.invoke(parameters) 

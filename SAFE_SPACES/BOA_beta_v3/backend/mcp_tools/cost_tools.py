@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from backend.mcp_server import Tool, ToolParameter
+from mcp_server_legacy import Tool, ToolParameter
 
 class CostAnalyzerTool(Tool):
     """Analyze infrastructure costs from Terraform configurations"""

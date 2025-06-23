@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from backend.mcp_server import Tool, ToolParameter
+from mcp_server_legacy import Tool, ToolParameter
 
 class DocumentGeneratorTool(Tool):
     """Generate various types of documentation from analysis results"""

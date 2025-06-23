@@ -10,19 +10,20 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 # Add the backend directory to the path
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
-from backend.mcp_server_legacy import Tool, ToolParameter
-from backend.coldrag.rag_inspector import run_rag_pipeline
-from backend.coldrag.utils.plan_parser import load_terraform_docs
-from backend.coldrag.utils.reference_loader import load_reference_docs
-from backend.coldrag.utils.output_validator import validate_and_write_output
+from coldrag.rag_inspector import run_rag_pipeline
+from coldrag.utils.plan_parser import load_terraform_docs
+from coldrag.utils.reference_loader import load_reference_docs
+from coldrag.utils.output_validator import validate_and_write_output
+from mcp_server_legacy import Tool
 
 class TerraformAnalyzerTool(Tool):
     """MCP Tool wrapper for the existing RAG inspector functionality"""
     
     def __init__(self):
+        from mcp_server_legacy import ToolParameter
         super().__init__(
             tool_id="terraform_analyzer",
             name="Terraform Configuration Analyzer",
@@ -82,6 +83,7 @@ class ComplianceReporterTool(Tool):
     """Generate compliance reports and summaries"""
     
     def __init__(self):
+        from mcp_server_legacy import ToolParameter
         super().__init__(
             tool_id="compliance_reporter",
             name="Compliance Report Generator",
@@ -235,6 +237,7 @@ class SecurityAuditorTool(Tool):
     """Specialized security analysis tool"""
     
     def __init__(self):
+        from mcp_server_legacy import ToolParameter
         super().__init__(
             tool_id="security_auditor",
             name="Security Auditor",

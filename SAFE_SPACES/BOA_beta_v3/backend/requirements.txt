@@ -7,7 +7,6 @@ pypdf
 jq
 fastapi
 uvicorn[standard]
-uvicorn
 
 # COLDRAG Dependencies
 langchain
