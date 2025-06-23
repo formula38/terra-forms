@@ -18,10 +18,10 @@ class DocumentGeneratorTool(Tool):
             name="Document Generator",
             description="Generate various types of documentation from analysis results",
             parameters=[
-                ToolParameter("analysis_file", "string", True, "Path to analysis results file"),
-                ToolParameter("document_type", "string", True, "Type of document to generate (executive_summary, technical_report, compliance_report)"),
-                ToolParameter("output_format", "string", False, "Output format (html, markdown, json)", default="html"),
-                ToolParameter("include_charts", "boolean", False, "Include charts and visualizations", default=True)
+                {"name": "analysis_file", "type": "string", "required": True, "description": "Path to analysis results file"},
+                {"name": "document_type", "type": "string", "required": True, "description": "Type of document to generate (executive_summary, technical_report, compliance_report)"},
+                {"name": "output_format", "type": "string", "required": False, "description": "Output format (html, markdown, json)", "default": "html"},
+                {"name": "include_charts", "type": "boolean", "required": False, "description": "Include charts and visualizations", "default": True}
             ],
             invoke_func=self._generate_document
         )

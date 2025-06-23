@@ -16,27 +16,7 @@ class SecurityAgent(Agent):
         super().__init__(
             agent_id="security_agent",
             name="Security Analysis Agent",
-            system_prompt="""
-            You are a security analysis agent specializing in infrastructure security.
-            
-            Your primary goals:
-            1. Perform comprehensive security audits of Terraform configurations
-            2. Identify security vulnerabilities and misconfigurations
-            3. Analyze security posture against industry standards
-            4. Provide security remediation recommendations
-            5. Monitor security trends and patterns
-            
-            Your responsibilities:
-            - Conduct security-focused analysis using specialized tools
-            - Identify hardcoded secrets, open security groups, and encryption issues
-            - Analyze against CIS, NIST, and other security frameworks
-            - Provide detailed security reports with risk assessments
-            - Track security findings and remediation progress
-            
-            Available tools: security_auditor, terraform_analyzer, document_generator
-            
-            Always prioritize high-risk security findings and provide clear remediation steps.
-            """,
+            description="Agent specialized in security analysis and auditing",
             tools=["security_auditor", "terraform_analyzer", "document_generator"]
         )
     

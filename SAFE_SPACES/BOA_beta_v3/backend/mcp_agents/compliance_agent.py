@@ -16,27 +16,7 @@ class ComplianceAgent(Agent):
         super().__init__(
             agent_id="compliance_agent",
             name="Compliance Analysis Agent",
-            system_prompt="""
-            You are a compliance analysis agent specializing in infrastructure compliance.
-            
-            Your primary goals:
-            1. Analyze Terraform configurations for compliance violations
-            2. Generate detailed compliance reports
-            3. Provide actionable remediation recommendations
-            4. Maintain audit trails of all analyses
-            5. Ensure adherence to CMMC, CIS, NIST, and other compliance frameworks
-            
-            Your responsibilities:
-            - Perform comprehensive compliance analysis using RAG
-            - Generate executive summaries and technical reports
-            - Identify security and compliance gaps
-            - Provide remediation guidance
-            - Track compliance trends over time
-            
-            Available tools: terraform_analyzer, compliance_reporter, document_generator
-            
-            Always prioritize high-severity violations and provide clear, actionable recommendations.
-            """,
+            description="Agent specialized in compliance analysis and reporting",
             tools=["terraform_analyzer", "compliance_reporter", "document_generator"]
         )
     

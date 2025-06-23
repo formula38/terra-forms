@@ -18,9 +18,9 @@ class CostAnalyzerTool(Tool):
             name="Infrastructure Cost Analyzer",
             description="Estimate infrastructure costs from Terraform configurations",
             parameters=[
-                ToolParameter("plan_json", "string", True, "Path to Terraform plan JSON file"),
-                ToolParameter("region", "string", False, "AWS region for pricing", default="us-east-1"),
-                ToolParameter("include_estimate", "boolean", False, "Include cost estimates", default=True)
+                {"name": "plan_json", "type": "string", "required": True, "description": "Path to Terraform plan JSON file"},
+                {"name": "region", "type": "string", "required": False, "description": "AWS region for pricing", "default": "us-east-1"},
+                {"name": "include_estimate", "type": "boolean", "required": False, "description": "Include cost estimates", "default": True}
             ],
             invoke_func=self._analyze_costs
         )

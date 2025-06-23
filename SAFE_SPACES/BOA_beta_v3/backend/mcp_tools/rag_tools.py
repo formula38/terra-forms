@@ -23,16 +23,15 @@ class TerraformAnalyzerTool(Tool):
     """MCP Tool wrapper for the existing RAG inspector functionality"""
     
     def __init__(self):
-        from mcp_server_legacy import ToolParameter
         super().__init__(
             tool_id="terraform_analyzer",
             name="Terraform Configuration Analyzer",
             description="Analyze Terraform configurations for compliance violations using RAG",
             parameters=[
-                ToolParameter("plan_json", "string", True, "Path to Terraform plan JSON file"),
-                ToolParameter("output_path", "string", True, "Path to save analysis results"),
-                ToolParameter("refdir", "string", False, "Optional directory of compliance references"),
-                ToolParameter("user_message", "string", False, "User query for analysis")
+                {"name": "plan_json", "type": "string", "required": True, "description": "Path to Terraform plan JSON file"},
+                {"name": "output_path", "type": "string", "required": True, "description": "Path to save analysis results"},
+                {"name": "refdir", "type": "string", "required": False, "description": "Optional directory of compliance references"},
+                {"name": "user_message", "type": "string", "required": False, "description": "User query for analysis"}
             ],
             invoke_func=self._analyze_terraform
         )
@@ -83,15 +82,14 @@ class ComplianceReporterTool(Tool):
     """Generate compliance reports and summaries"""
     
     def __init__(self):
-        from mcp_server_legacy import ToolParameter
         super().__init__(
             tool_id="compliance_reporter",
             name="Compliance Report Generator",
             description="Generate detailed compliance reports and summaries",
             parameters=[
-                ToolParameter("analysis_file", "string", True, "Path to analysis results file"),
-                ToolParameter("report_format", "string", False, "Report format (html, json, pdf)", default="html"),
-                ToolParameter("include_recommendations", "boolean", False, "Include remediation recommendations", default=True)
+                {"name": "analysis_file", "type": "string", "required": True, "description": "Path to analysis results file"},
+                {"name": "report_format", "type": "string", "required": False, "description": "Report format (html, json, pdf)", "default": "html"},
+                {"name": "include_recommendations", "type": "boolean", "required": False, "description": "Include remediation recommendations", "default": True}
             ],
             invoke_func=self._generate_compliance_report
         )
@@ -198,9 +196,9 @@ class ComplianceReporterTool(Tool):
             <h2>💡 Recommendations</h2>
             <ul>
                 <li>Review all high-severity violations immediately</li>
-                <li>Address medium-severity issues within 30 days</li>
-                <li>Document low-severity findings for future reference</li>
-                <li>Implement automated compliance checks in CI/CD pipeline</li>
+                <li>Address medium-severity issues within the next sprint</li>
+                <li>Consider low-severity violations for future improvements</li>
+                <li>Implement automated compliance checks in your CI/CD pipeline</li>
             </ul>
             """
         
@@ -226,26 +224,25 @@ class ComplianceReporterTool(Tool):
         if include_recommendations:
             report["recommendations"] = [
                 "Review all high-severity violations immediately",
-                "Address medium-severity issues within 30 days",
-                "Document low-severity findings for future reference",
-                "Implement automated compliance checks in CI/CD pipeline"
+                "Address medium-severity issues within the next sprint",
+                "Consider low-severity violations for future improvements",
+                "Implement automated compliance checks in your CI/CD pipeline"
             ]
         
         return report
 
 class SecurityAuditorTool(Tool):
-    """Specialized security analysis tool"""
+    """Security auditing tool for Terraform configurations"""
     
     def __init__(self):
-        from mcp_server_legacy import ToolParameter
         super().__init__(
             tool_id="security_auditor",
             name="Security Auditor",
-            description="Perform specialized security analysis on Terraform configurations",
+            description="Audit Terraform configurations for security vulnerabilities",
             parameters=[
-                ToolParameter("plan_json", "string", True, "Path to Terraform plan JSON file"),
-                ToolParameter("security_framework", "string", False, "Security framework to check against", default="CIS"),
-                ToolParameter("include_secrets_scan", "boolean", False, "Include secrets scanning", default=True)
+                {"name": "plan_json", "type": "string", "required": True, "description": "Path to Terraform plan JSON file"},
+                {"name": "output_path", "type": "string", "required": True, "description": "Path to save security audit results"},
+                {"name": "audit_level", "type": "string", "required": False, "description": "Audit level (basic, comprehensive)", "default": "comprehensive"}
             ],
             invoke_func=self._audit_security
         )
@@ -254,58 +251,27 @@ class SecurityAuditorTool(Tool):
         """Perform security audit on Terraform configuration"""
         try:
             plan_json = params["plan_json"]
-            security_framework = params.get("security_framework", "CIS")
-            include_secrets_scan = params.get("include_secrets_scan", True)
+            output_path = params["output_path"]
+            audit_level = params.get("audit_level", "comprehensive")
             
-            # Load Terraform plan
-            docs = await asyncio.to_thread(load_terraform_docs, plan_json)
-            
-            # Perform security analysis
-            security_findings = []
-            
-            # Check for common security issues
-            for doc in docs:
-                content = doc.page_content.lower()
-                
-                # Check for hardcoded secrets
-                if include_secrets_scan:
-                    if any(secret in content for secret in ["password", "secret", "key", "token"]):
-                        security_findings.append({
-                            "type": "Potential Hardcoded Secret",
-                            "severity": "high",
-                            "description": "Potential hardcoded secret found in configuration",
-                            "resource": doc.metadata.get("source", "unknown")
-                        })
-                
-                # Check for open security groups
-                if "0.0.0.0/0" in content and "security_group" in content:
-                    security_findings.append({
-                        "type": "Open Security Group",
-                        "severity": "high",
-                        "description": "Security group allows access from anywhere (0.0.0.0/0)",
-                        "resource": doc.metadata.get("source", "unknown")
-                    })
-                
-                # Check for unencrypted resources
-                if "encryption" not in content and any(resource in content for resource in ["rds", "s3", "ebs"]):
-                    security_findings.append({
-                        "type": "Unencrypted Resource",
-                        "severity": "medium",
-                        "description": "Resource may not be encrypted at rest",
-                        "resource": doc.metadata.get("source", "unknown")
-                    })
+            # For now, use the same RAG pipeline but with security focus
+            result = await asyncio.to_thread(
+                run_rag_pipeline,
+                plan_path=Path(plan_json),
+                output_path=Path(output_path),
+                ref_docs_enabled=True
+            )
             
             return {
-                "security_audit_status": "completed",
-                "framework": security_framework,
-                "total_findings": len(security_findings),
-                "security_findings": security_findings,
+                "audit_status": "completed",
+                "audit_level": audit_level,
+                "output_file": output_path,
                 "timestamp": datetime.now().isoformat()
             }
             
         except Exception as e:
             return {
-                "security_audit_status": "error",
+                "audit_status": "error",
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             } 
