@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # 1. The User Interface
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/bizops-dashboard/Dockerfile
+    ports:
+      - "4200:80" # Expose Angular app on port 4200
+    networks:
+      - boa_network
+
+  # 2. The Orchestrator
+  n8n:
+    image: n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - WEBHOOK_URL=http://n8n:5678/ # Use service name for inter-container communication
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - boa_network
+
+  # 3. The Agent Server (The "Brain")
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # Tell the backend where to find the other services
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - QDRANT_HOST=vector-db
+      - QDRANT_PORT=6333
+    volumes:
+      # Mount the output directory to persist analysis results
+      - ./output:/app/output
+    networks:
+      - boa_network
+    depends_on:
+      - ollama
+      - vector-db
+
+  # 4. The Local LLM Server
+  ollama:
+    image: ollama/ollama
+    # ports:
+    #   - "11434:11434" # No need to expose port to host, backend will use internal network
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - boa_network
+
+  # 5. The RAG Database
+  vector-db:
+    image: qdrant/qdrant
+    # ports:
+    #   - "6333:6333" # No need to expose port to host, backend will use internal network
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - boa_network
+
+networks:
+  boa_network:
+    driver: bridge
+
+volumes:
+  n8n_data:
+  ollama_data:
+  qdrant_data: 
