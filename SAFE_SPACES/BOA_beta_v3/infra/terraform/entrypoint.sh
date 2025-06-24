@@ -14,6 +14,66 @@ else
     fi
 fi
 
+# AWS Credential Detection and Setup
+echo "🔍 Checking AWS credentials..."
+
+# Check if AWS CLI is available and configured
+if command -v aws &> /dev/null; then
+    echo "[INFO] AWS CLI found, checking configuration..."
+    
+    # Check if AWS credentials directory exists and is readable
+    if [ -d "/home/terraform/.aws" ]; then
+        echo "✅ AWS credentials directory found"
+        ls -la /home/terraform/.aws/
+        
+        # Check if credentials file exists
+        if [ -f "/home/terraform/.aws/credentials" ]; then
+            echo "✅ AWS credentials file found"
+        else
+            echo "⚠️  AWS credentials file not found"
+        fi
+        
+        # Check if config file exists
+        if [ -f "/home/terraform/.aws/config" ]; then
+            echo "✅ AWS config file found"
+        else
+            echo "⚠️  AWS config file not found"
+        fi
+    else
+        echo "⚠️  AWS credentials directory not found"
+    fi
+    
+    # Test AWS credentials
+    if aws sts get-caller-identity &> /dev/null; then
+        echo "✅ AWS CLI credentials working"
+        echo "📋 AWS Identity: $(aws sts get-caller-identity --query 'Arn' --output text)"
+    else
+        echo "⚠️  AWS CLI configured but credentials not working"
+        echo "🔧 Checking for environment variables..."
+        
+        # Check if environment variables are set
+        if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "✅ AWS credentials found in environment variables"
+        else
+            echo "❌ No AWS credentials found"
+            echo "Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"
+            echo "Or configure AWS CLI with: aws configure"
+            exit 1
+        fi
+    fi
+else
+    echo "⚠️  AWS CLI not found, checking environment variables..."
+    
+    # Check if environment variables are set
+    if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "✅ AWS credentials found in environment variables"
+    else
+        echo "❌ No AWS credentials found"
+        echo "Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"
+        exit 1
+    fi
+fi
+
 # Handle AWS session token - only set if it has a valid value
 if [ -n "$AWS_SESSION_TOKEN" ] && [ "$AWS_SESSION_TOKEN" != "" ]; then
     echo "[INFO] Using AWS session token for temporary credentials."
@@ -21,6 +81,9 @@ else
     echo "[INFO] No AWS session token found, using long-term credentials."
     unset AWS_SESSION_TOKEN
 fi
+
+# Set AWS CLI to not use shared config to avoid profile issues
+export AWS_SDK_LOAD_CONFIG=false
 
 echo "🚀 Starting Terraform build process..."
 
