@@ -1,4 +1,4 @@
-Here’s your enhanced and tailored `README.md` for the **CMMC-Compliant AWS Infrastructure**. It includes diagrams and highlights how the infrastructure aligns with **CMMC** requirements:
+Here's your enhanced and tailored `README.md` for the **CMMC-Compliant AWS Infrastructure**. It includes diagrams and highlights how the infrastructure aligns with **CMMC** requirements:
 
 ---
 
@@ -14,23 +14,67 @@ This project provisions a modular, secure, and compliant cloud environment align
 ## 📦 Project Structure
 
 ```
-CMMC/
-├── main.tf
-├── variables.tf
-├── terraform.tfvars
-├── outputs.tf
-├── providers.tf
-├── modules/
-│   ├── compute/
-│   ├── config/
-│   ├── kms/
-│   ├── logging/
-│   ├── networking/
-│   ├── rds/
-│   └── s3/
+BOA_beta_v3/
+├── infra/terraform/           # Terraform infrastructure code
+│   ├── Dockerfile            # Terraform build container
+│   ├── docker-compose.yml    # Container orchestration
+│   ├── run-terraform.sh      # Convenience script
+│   ├── main.tf               # Main Terraform configuration
+│   ├── variables.tf          # Variable definitions
+│   ├── terraform.tfvars      # Variable values
+│   └── modules/              # Terraform modules
+├── backend/                   # MCP server and agents
+├── frontend/                  # Angular dashboard
+├── docker-compose.yml         # Main application orchestration
+└── output/                    # Analysis results and reports
 ```
 
 Each module is responsible for a discrete part of the infrastructure, ensuring security and compliance boundaries.
+
+---
+
+## 🐳 Dockerized Terraform Build
+
+The project includes a containerized Terraform build environment for consistent, isolated infrastructure deployments.
+
+### Quick Start with Terraform Container
+
+1. **Set up environment variables:**
+   ```bash
+   cd infra/terraform
+   cp env.example .env
+   # Edit .env with your AWS credentials
+   ```
+
+2. **Run Terraform operations:**
+   ```bash
+   # Create a plan (default)
+   ./run-terraform.sh
+
+   # Apply changes
+   ./run-terraform.sh apply
+
+   # Validate configuration
+   ./run-terraform.sh validate
+   ```
+
+3. **Using Docker Compose:**
+   ```bash
+   # From project root
+   docker-compose run --rm terraform-build
+
+   # Apply changes
+   APPLY=true docker-compose run --rm terraform-build
+   ```
+
+### Terraform Container Features
+
+- **Consistent Environment**: Terraform 1.7.0 with AWS CLI and Python tools
+- **Security**: Runs as non-root user with resource limits
+- **Automation**: Automatic initialization, validation, and formatting
+- **Integration**: Works with the main application stack
+
+For detailed Terraform container documentation, see [infra/terraform/README.md](infra/terraform/README.md).
 
 ---
 
@@ -79,6 +123,24 @@ Each module is responsible for a discrete part of the infrastructure, ensuring s
 
 ## 🚀 Getting Started
 
+### Option 1: Using Docker (Recommended)
+
+1. **Start the full application stack:**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Run Terraform build:**
+   ```bash
+   # Create infrastructure plan
+   docker-compose run --rm terraform-build
+
+   # Apply infrastructure changes
+   APPLY=true docker-compose run --rm terraform-build
+   ```
+
+### Option 2: Local Development
+
 1. **Install Terraform**
    ```bash
    brew install terraform     # Mac
@@ -92,8 +154,8 @@ Each module is responsible for a discrete part of the infrastructure, ensuring s
 
 3. **Clone and Initialize**
    ```bash
-   git clone https://github.com/YOUR_ORG/CMMC-Infrastructure.git
-   cd CMMC
+   git clone https://github.com/YOUR_ORG/BOA_beta_v3.git
+   cd BOA_beta_v3/infra/terraform
    terraform init
    ```
 
@@ -119,6 +181,13 @@ Each module is responsible for a discrete part of the infrastructure, ensuring s
 
 ## 🧹 Tear Down
 
+### Using Docker:
+```bash
+# Destroy infrastructure
+docker-compose run --rm terraform-build destroy
+```
+
+### Using Local Terraform:
 ```bash
 terraform destroy -var-file="terraform.tfvars"
 ```

@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  terraform-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # AWS Configuration
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-1}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      
+      # Terraform Configuration
+      - TF_VAR_environment=${TF_VAR_environment:-production}
+      - TF_VAR_project=${TF_VAR_project:-BOA_Beta_v3}
+      - TF_VAR_owner=${TF_VAR_owner:-coldchainsecure}
+      - TF_VAR_cost_center=${TF_VAR_cost_center:-IT}
+      
+      # Build Configuration
+      - APPLY=${APPLY:-false}
+      
+    volumes:
+      # Mount AWS credentials if using local files
+      - ${HOME}/.aws:/root/.aws:ro
+      
+      # Mount output directory for plans and logs
+      - ./output:/terraform/output
+      
+      # Mount terraform state directory (optional)
+      - ./state:/terraform/state
+      
+    working_dir: /terraform
+    
+    # Run as non-root user for security
+    user: "1000:1000"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "terraform", "version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      
+    # Restart policy
+    restart: "no"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+networks:
+  default:
+    name: terraform-network 

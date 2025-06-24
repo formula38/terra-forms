@@ -5,6 +5,7 @@ import asyncio
 import os
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+import inspect
 
 class Tool:
     """Base class for all tools"""
@@ -85,7 +86,24 @@ class Agent:
             result = await self.tools[action].invoke(parameters)
             self.status = "idle"
             return result
-        
+
+        # If the agent has a custom action implementation, use it
+        _execute_action_impl = getattr(self, "_execute_action_impl", None)
+        if callable(_execute_action_impl):
+            try:
+                self.status = f"executing {action}"
+                if inspect.iscoroutinefunction(_execute_action_impl):
+                    result = await _execute_action_impl(action, parameters)
+                else:
+                    result = _execute_action_impl(action, parameters)
+                self.status = "idle"
+                if not isinstance(result, dict):
+                    result = {"result": result}
+                return result
+            except Exception as e:
+                self.status = "idle"
+                return {"error": f"Exception in action {action}: {str(e)}"}
+
         # If not, try to get it from the MCP host
         tool = mcp_host.get_tool(action)
         if tool:
@@ -93,7 +111,7 @@ class Agent:
             result = await tool.invoke(parameters)
             self.status = "idle"
             return result
-            
+
         return {"error": f"Action {action} not found"}
 
     def get_status(self) -> str:

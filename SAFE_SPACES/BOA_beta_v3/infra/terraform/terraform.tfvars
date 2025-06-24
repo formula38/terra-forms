@@ -23,7 +23,7 @@ name_prefix = "cmmc"
 ami_id          = "ami-0c55b159cbfafe1f0"
 ebs_device_name = "/dev/sda1"
 instance_type   = "t3.micro"
-user_data_script_path = "../../backend/scripts/infra/ec2_user_data.sh"
+user_data_script_path = "ec2_user_data.sh"
 
 
 # =============================
